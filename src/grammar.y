@@ -2,7 +2,7 @@
     #include <stdio.h>
 
     #include "header.h"
-
+	
     extern int yylineno;
 
     int step=0;
@@ -26,15 +26,16 @@
 %token INT FLOAT VOID
 %token IF ELSE WHILE RETURN FOR
 %start program
+
 %union {
+  struct expression exp;
   char *string;
   int n;
   float f;
-
-  struct expression exp;
  }
 
 %type <exp> primary_expression postfix_expression argument_expression_list unary_expression unary_operator multiplicative_expression additive_expression
+
 
 %%
 

@@ -11,7 +11,7 @@ parse:grammar.c scanner.c
 grammar.c:grammar.y
 	$(YACC) -d -o $@ --defines=grammar.tab.h $^
 
-%.c:%.l
+scanner.c: scanner.l
 	$(LEX) -o $@ $^
 
 clean:

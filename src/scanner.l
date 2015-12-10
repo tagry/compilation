@@ -1,9 +1,9 @@
 %{
 #include <stdio.h>
 #include <string.h>
-
 #include "header.h"
 #include "grammar.tab.h"
+
 void count();
 int comment ();
 %}

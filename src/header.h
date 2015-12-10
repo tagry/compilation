@@ -1,5 +1,5 @@
 #define HEADER_H
-#ifndef HEADER_H
+
 
 enum type_expression
   {
@@ -8,10 +8,10 @@ enum type_expression
 
 struct expression
 {
-  char * code;
-  enum type_expression type;  
-  int name;
+	char *code;
+	enum type_expression type;  
+	int name;
 };
 
 
-#endif
+
