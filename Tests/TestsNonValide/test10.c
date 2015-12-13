@@ -6,6 +6,6 @@ int main()
 {
 	int A[];
 	int B[];
-	B = map(f,A); //probleme la taille de A est nul	
+	B = map(f,A); //probleme la taille de A est nulle
 	return 0;
 }
