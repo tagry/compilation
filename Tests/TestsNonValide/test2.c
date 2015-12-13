@@ -1,6 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-
 int g(int x)
 {
 	return x+2;

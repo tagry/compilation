@@ -13,6 +13,7 @@ int main()
 	B[2] = 3;
 
 	int x;
+	
 	x = reduce(g,B); // x = 1+2+3 = 6
 
 	return 0;

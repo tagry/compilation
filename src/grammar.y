@@ -1,6 +1,7 @@
 %{
     #include <stdio.h>
-
+#include <string.h>
+#include <stdlib.h>
     #include "header.h"
 	
     extern int yylineno;
@@ -18,9 +19,9 @@
 
 %}
 
-%token <string> IDENTIFIER CONSTANTF CONSTANTI FILE_INCLUDE
-%token MAP REDUCE EXTERN INCLUDE
-%token INC_OP DEC_OP LE_OP GE_OP EQ_OP NE_OP
+%token <string> IDENTIFIER CONSTANTF CONSTANTI
+%token MAP REDUCE EXTERN
+%token INC_OP DEC_OP LE_OP GE_OP EQ_OP NE_OP OU_OP ET_OP
 %token SUB_ASSIGN MUL_ASSIGN ADD_ASSIGN
 %token TYPE_NAME
 %token INT FLOAT VOID
@@ -51,13 +52,11 @@ primary_expression
 | IDENTIFIER '(' argument_expression_list ')'
 | IDENTIFIER INC_OP
 | IDENTIFIER DEC_OP
-| INCLUDE '<' FILE_INCLUDE '>'
-| INCLUDE '"' FILE_INCLUDE '"'
+| IDENTIFIER '[' expression ']'
 ;
 
 postfix_expression
 : primary_expression
-| IDENTIFIER '[' primary_expression ']'
 ;
 
 argument_expression_list
@@ -90,8 +89,11 @@ additive_expression
 
 comparison_expression
 : additive_expression
+| '!' additive_expression
 | additive_expression '<' additive_expression
 | additive_expression '>' additive_expression
+| additive_expression ET_OP additive_expression
+| additive_expression OU_OP additive_expression
 | additive_expression LE_OP additive_expression
 | additive_expression GE_OP additive_expression
 | additive_expression EQ_OP additive_expression
@@ -131,6 +133,7 @@ declarator
 | IDENTIFIER '=' primary_expression
 | '(' declarator ')'
 | declarator '[' CONSTANTI ']'
+| declarator '[' CONSTANTI ']''=' '{' argument_expression_list '}'
 | declarator '[' ']'
 | declarator '(' parameter_list ')'
 | declarator '(' ')'
@@ -142,7 +145,7 @@ parameter_list
 ;
 
 parameter_declaration
-: type_name declarator
+: type_name declarator 
 ;
 
 statement
