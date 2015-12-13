@@ -24,6 +24,8 @@ L[a-zA-Z_]
 "map"           { count(); return(MAP); }
 "reduce"        { count(); return(REDUCE); }
 "extern"        { count(); return(EXTERN); }
+"#include"      { count(); return(INCLUDE); }
+[$]?{L}({L}|{D})*".h" { count(); yylval.string=strdup(yytext); return(FILE_INCLUDE); }
 [$]?{L}({L}|{D})*	{ count(); yylval.string=strdup(yytext); return(IDENTIFIER); }
 {D}+    	{ count(); yylval.string=strdup(yytext); return(CONSTANTI); }
 {D}+"."{D}*     { count(); yylval.string=strdup(yytext); return(CONSTANTF); }

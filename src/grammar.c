@@ -62,7 +62,7 @@
 
 
 /* Copy the first part of user declarations.  */
-#line 1 "grammar.y" /* yacc.c:339  */
+#line 1 "src/grammar.y" /* yacc.c:339  */
 
     #include <stdio.h>
 
@@ -82,7 +82,7 @@
     }
 
 
-#line 86 "grammar.c" /* yacc.c:339  */
+#line 86 "src/grammar.c" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -102,8 +102,8 @@
 
 /* In a future release of Bison, this section will be replaced
    by #include "grammar.tab.h".  */
-#ifndef YY_YY_GRAMMAR_TAB_H_INCLUDED
-# define YY_YY_GRAMMAR_TAB_H_INCLUDED
+#ifndef YY_YY_SRC_GRAMMAR_TAB_H_INCLUDED
+# define YY_YY_SRC_GRAMMAR_TAB_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -149,7 +149,7 @@ extern int yydebug;
 typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
-#line 30 "grammar.y" /* yacc.c:355  */
+#line 30 "src/grammar.y" /* yacc.c:355  */
 
   struct expression exp;
   char *string;
@@ -157,7 +157,7 @@ union YYSTYPE
   float f;
  
 
-#line 161 "grammar.c" /* yacc.c:355  */
+#line 161 "src/grammar.c" /* yacc.c:355  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
@@ -168,11 +168,11 @@ extern YYSTYPE yylval;
 
 int yyparse (void);
 
-#endif /* !YY_YY_GRAMMAR_TAB_H_INCLUDED  */
+#endif /* !YY_YY_SRC_GRAMMAR_TAB_H_INCLUDED  */
 
 /* Copy the second part of user declarations.  */
 
-#line 176 "grammar.c" /* yacc.c:358  */
+#line 176 "src/grammar.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -1388,19 +1388,19 @@ yyreduce:
   switch (yyn)
     {
         case 3:
-#line 44 "grammar.y" /* yacc.c:1646  */
+#line 44 "src/grammar.y" /* yacc.c:1646  */
     {(yyval.exp).type = T_INT; (yyval.exp).name = tmp_var_name(); asprintf((yyval.exp).code, "%%x%d = add i32 %s, 0",tmp_var_name(), (yyvsp[0].string));}
-#line 1394 "grammar.c" /* yacc.c:1646  */
+#line 1394 "src/grammar.c" /* yacc.c:1646  */
     break;
 
   case 4:
-#line 45 "grammar.y" /* yacc.c:1646  */
+#line 45 "src/grammar.y" /* yacc.c:1646  */
     {(yyval.exp).type = T_FLOAT; (yyval.exp).name = tmp_var_name(); asprintf((yyval.exp).code, "%%x%d = add f32 %s, 0", tmp_var_name(), (yyvsp[0].string));}
-#line 1400 "grammar.c" /* yacc.c:1646  */
+#line 1400 "src/grammar.c" /* yacc.c:1646  */
     break;
 
 
-#line 1404 "grammar.c" /* yacc.c:1646  */
+#line 1404 "src/grammar.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1628,7 +1628,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 202 "grammar.y" /* yacc.c:1906  */
+#line 202 "src/grammar.y" /* yacc.c:1906  */
 
 #include <stdio.h>
 #include <string.h>

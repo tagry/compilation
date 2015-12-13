@@ -18,8 +18,8 @@
 
 %}
 
-%token <string> IDENTIFIER CONSTANTF CONSTANTI 
-%token MAP REDUCE EXTERN
+%token <string> IDENTIFIER CONSTANTF CONSTANTI FILE_INCLUDE
+%token MAP REDUCE EXTERN INCLUDE
 %token INC_OP DEC_OP LE_OP GE_OP EQ_OP NE_OP
 %token SUB_ASSIGN MUL_ASSIGN ADD_ASSIGN
 %token TYPE_NAME
@@ -39,6 +39,7 @@
 
 %%
 
+
 primary_expression
 : IDENTIFIER
 | CONSTANTI {$$.type = T_INT; $$.name = tmp_var_name(); asprintf($$.code, "%%x%d = add i32 %s, 0",tmp_var_name(), $1);}
@@ -50,11 +51,13 @@ primary_expression
 | IDENTIFIER '(' argument_expression_list ')'
 | IDENTIFIER INC_OP
 | IDENTIFIER DEC_OP
+| INCLUDE '<' FILE_INCLUDE '>'
+| INCLUDE '"' FILE_INCLUDE '"'
 ;
 
 postfix_expression
 : primary_expression
-| postfix_expression '[' expression ']'
+| IDENTIFIER '[' primary_expression ']'
 ;
 
 argument_expression_list
@@ -124,7 +127,8 @@ type_name
 ;
 
 declarator
-: IDENTIFIER  
+: IDENTIFIER
+| IDENTIFIER '=' primary_expression
 | '(' declarator ')'
 | declarator '[' CONSTANTI ']'
 | declarator '[' ']'
