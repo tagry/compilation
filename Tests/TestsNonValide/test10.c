@@ -1,6 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-
 int f(int x) {
    return x+5;
 }

@@ -1,7 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-
-
 void *thread_1(void *arg)
 {
     pthread_exit(NULL);
