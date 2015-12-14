@@ -1,5 +1,6 @@
-#define HEADER_H
-
+#include <stdio.h>
+#include <string.h>
+#define SIZE 1013 
 
 enum type_expression
   {
@@ -12,6 +13,14 @@ struct expression
 	enum type_expression type;  
 	int name;
 };
+
+struct  symbol_t{
+  char *name;
+  enum type_expression type;
+  char *code;
+  char *var;
+};
+
 
 
 

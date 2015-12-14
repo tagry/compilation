@@ -1,8 +1,8 @@
 %{
-    #include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
     #include "header.h"
+    #include <stdio.h>
+    #include <string.h>
+    #include <stdlib.h>
 	
     extern int yylineno;
 
@@ -11,6 +11,29 @@
     int yylex ();
     int yyerror ();
 
+
+	struct symbol_t EMPTY={"",0,"",""}; // un symbole vide
+	struct symbol_t hachtab[SIZE];
+
+	int hachage(char *s) {
+	unsigned int hash = 0; 
+	while (*s!='\0') hash = hash*31 + *s++;
+	return hash%SIZE;
+ }
+	struct symbol_t findtab(char *s) {
+	if (strcmp(hachtab[hachage(s)].name,s)) return hachtab[hachage(s)];
+	return EMPTY;
+ }
+	void addtab(char *s,enum type_expression type) {
+	struct symbol_t *h=&hachtab[hachage(s)];
+	h->name=s; h->type=type; h->code=NULL; h->var=NULL;
+ }
+	void init() {
+	int i;
+	for (i=0; i<SIZE; i++) hachtab[i]=EMPTY;
+	}
+
+	
     int tmp_var_name()
     {
       step++;
@@ -29,22 +52,22 @@
 %start program
 
 %union {
-  struct expression exp;
+  struct symbol_t exp;
   char *string;
   int n;
   float f;
  }
 
-%type <exp> primary_expression postfix_expression argument_expression_list unary_expression unary_operator multiplicative_expression additive_expression
+%type <exp> argument_list primary_expression postfix_expression argument_expression_list unary_expression unary_operator multiplicative_expression additive_expression
 
 
 %%
 
 
 primary_expression
-: IDENTIFIER
-| CONSTANTI {$$.type = T_INT; $$.name = tmp_var_name(); asprintf($$.code, "%%x%d = add i32 %s, 0",tmp_var_name(), $1);}
-| CONSTANTF {$$.type = T_FLOAT; $$.name = tmp_var_name(); asprintf($$.code, "%%x%d = add f32 %s, 0", tmp_var_name(), $1);}
+: IDENTIFIER {$$.name = tmp_var_name();}
+| CONSTANTI //{$$.type = T_INT; $$.name = tmp_var_name(); asprintf($$.code, "%%x%d = add i32 %s, 0",tmp_var_name(), $1);}
+| CONSTANTF //{$$.type = T_FLOAT; $$.name = tmp_var_name(); asprintf($$.code, "%%x%d = add f32 %s, 0", tmp_var_name(), $1);}
 | '(' expression ')'
 | MAP '(' postfix_expression ',' postfix_expression ')'
 | REDUCE '(' postfix_expression ',' postfix_expression ')'
@@ -126,17 +149,26 @@ type_name
 : VOID  
 | INT   
 | FLOAT
+| VOID '*' 
+| INT  '*' 
+| FLOAT '*'
 ;
 
 declarator
 : IDENTIFIER
 | IDENTIFIER '=' primary_expression
 | '(' declarator ')'
+| '(' '*'  IDENTIFIER ')' '(' argument_list ')'
 | declarator '[' CONSTANTI ']'
 | declarator '[' CONSTANTI ']''=' '{' argument_expression_list '}'
 | declarator '[' ']'
 | declarator '(' parameter_list ')'
 | declarator '(' ')'
+;
+
+argument_list
+: type_name
+| type_name ',' argument_list
 ;
 
 parameter_list

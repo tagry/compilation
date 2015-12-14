@@ -1,13 +1,13 @@
 void *thread_1(void *arg)
 {
-    pthread_exit(NULL);
+    pthread_exit();
 }
 
 
-int main(void)
+int main()
 
 {
     pthread_t thread1;
-    pthread_create(&thread1, NULL, thread_1, NULL)
+    pthread_create(&thread1, thread_1);
     return 0;
 }
