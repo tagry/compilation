@@ -7,7 +7,6 @@
     extern int yylineno;
 
     int step=0;
-
     int yylex ();
     int yyerror ();
 
@@ -65,11 +64,11 @@
 
 
 primary_expression
-: IDENTIFIER {$$.name = tmp_var_name();}
-| CONSTANTI //{$$.type = T_INT; $$.name = tmp_var_name(); asprintf($$.code, "%%x%d = add i32 %s, 0",tmp_var_name(), $1);}
-| CONSTANTF //{$$.type = T_FLOAT; $$.name = tmp_var_name(); asprintf($$.code, "%%x%d = add f32 %s, 0", tmp_var_name(), $1);}
-| '(' expression ')'
-| MAP '(' postfix_expression ',' postfix_expression ')'
+: IDENTIFIER {asprintf($$.code, "load %s", $1);}
+| CONSTANTI  {asprintf($$.code, "%s", $1); /*asprintf($$.code, "%%x%d = add i32 %s, 0",tmp_var_name(), $1);*/}
+| CONSTANTF  {asprintf($$.code,"%s",$1);/* asprintf($$.code, "%%x%d = add f32 %s, 0", tmp_var_name(), $1);*/}
+| '(' expression ')' {asprintf($$.code, "%s", $1);}
+| MAP '(' postfix_expression ',' postfix_expression ')' 
 | REDUCE '(' postfix_expression ',' postfix_expression ')'
 | IDENTIFIER '(' ')'
 | IDENTIFIER '(' argument_expression_list ')'
@@ -79,7 +78,7 @@ primary_expression
 ;
 
 postfix_expression
-: primary_expression
+: primary_expression 
 ;
 
 argument_expression_list
@@ -124,7 +123,30 @@ comparison_expression
 ;
 
 expression
-: unary_expression assignment_operator comparison_expression
+: unary_expression assignment_operator comparison_expression {
+	if($2 == '=')
+	{
+		if(unary_expression.type == 'T_INT')
+		{
+			$$.type = 'T_INT';
+			tmp_var_name();
+			asprintf($$.code,"%%x%d = load i32* %s\nstore i32 %%x%d, %s",step, $3.var,step, $1.var);
+		}
+				 
+	}
+	else if($2 == MUL_ASSIGN)
+	{
+
+	}
+	else if($2 == ADD_ASSIGN)
+	{
+
+	}
+	else if($2 == SUB_ASSIGN)
+	{
+
+	}
+ }
 | comparison_expression
 ;
 
