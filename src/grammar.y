@@ -1,37 +1,15 @@
 %{
-    #include "header.h"
+	#define _GNU_SOURCE
     #include <stdio.h>
     #include <string.h>
     #include <stdlib.h>
+	#include "table_symbol.c"
 	
     extern int yylineno;
 
     int step=0;
     int yylex ();
     int yyerror ();
-
-
-	struct symbol_t EMPTY={"",0,"",""}; // un symbole vide
-	struct symbol_t hachtab[SIZE];
-
-	int hachage(char *s) {
-	unsigned int hash = 0; 
-	while (*s!='\0') hash = hash*31 + *s++;
-	return hash%SIZE;
- }
-	struct symbol_t findtab(char *s) {
-	if (strcmp(hachtab[hachage(s)].name,s)) return hachtab[hachage(s)];
-	return EMPTY;
- }
-	void addtab(char *s,enum type_expression type) {
-	struct symbol_t *h=&hachtab[hachage(s)];
-	h->name=s; h->type=type; h->code=NULL; h->var=NULL;
- }
-	void init() {
-	int i;
-	for (i=0; i<SIZE; i++) hachtab[i]=EMPTY;
-	}
-
 	
     int tmp_var_name()
     {
@@ -51,23 +29,23 @@
 %start program
 
 %union {
-  struct symbol_t exp;
+  struct expression exp;
   char *string;
   int n;
   float f;
  }
 
-%type <exp> argument_list primary_expression postfix_expression argument_expression_list unary_expression unary_operator multiplicative_expression additive_expression
+%type <exp> argument_list primary_expression postfix_expression argument_expression_list unary_expression unary_operator multiplicative_expression additive_expression expression assignment_operator comparison_expression declarator declarator_list declaration type_name
 
 
 %%
 
 
 primary_expression
-: IDENTIFIER {asprintf($$.code, "load %s", $1);}
-| CONSTANTI  {asprintf($$.code, "%s", $1); /*asprintf($$.code, "%%x%d = add i32 %s, 0",tmp_var_name(), $1);*/}
-| CONSTANTF  {asprintf($$.code,"%s",$1);/* asprintf($$.code, "%%x%d = add f32 %s, 0", tmp_var_name(), $1);*/}
-| '(' expression ')' {asprintf($$.code, "%s", $1);}
+: IDENTIFIER {asprintf(&$$.code, "load %s", $1);}
+| CONSTANTI  {asprintf(&$$.code, "%s", $1); /*asprintf($$.code, "%%x%d = add i32 %s, 0",tmp_var_name(), $1);*/}
+| CONSTANTF  {asprintf(&$$.code,"%s",$1);/* asprintf($$.code, "%%x%d = add f32 %s, 0", tmp_var_name(), $1);*/}
+| '(' expression ')' {asprintf(&$$.code, "%s", $2.code);}
 | MAP '(' postfix_expression ',' postfix_expression ')' 
 | REDUCE '(' postfix_expression ',' postfix_expression ')'
 | IDENTIFIER '(' ')'
@@ -124,25 +102,25 @@ comparison_expression
 
 expression
 : unary_expression assignment_operator comparison_expression {
-	if($2 == '=')
+	if($2.code[0] == '=')
 	{
-		if(unary_expression.type == 'T_INT')
+		if($1.type == T_INT)
 		{
-			$$.type = 'T_INT';
+			$$.type = T_INT;
 			tmp_var_name();
-			asprintf($$.code,"%%x%d = load i32* %s\nstore i32 %%x%d, %s",step, $3.var,step, $1.var);
+			asprintf(&$$.code,"%%x%d = load i32* %s\nstore i32 %%x%d, %s",step, $3.var,step, $1.var);
 		}
 				 
 	}
-	else if($2 == MUL_ASSIGN)
+	else if(strcmp($2.code, "*="))
 	{
 
 	}
-	else if($2 == ADD_ASSIGN)
+	else if(strcmp($2.code, "+="))
 	{
 
 	}
-	else if($2 == SUB_ASSIGN)
+	else if(strcmp($2.code, "-="))
 	{
 
 	}
@@ -158,26 +136,42 @@ assignment_operator
 ;
 
 declaration
-: type_name declarator_list ';'
+: type_name declarator_list ';' {
+	int i = 0;
+	for(i = 0; $2.code[i] != '\0';i++)
+	{
+		if($2.code[i] == ',')
+		{
+			$2.code[i] = '\0';
+			detection_declaration_multiple($2.code, $1.code);
+			$2.code += i+1;// Décale le tableau apres la virgule
+			i = 0;
+		}
+		
+	}
+	detection_declaration_multiple($2.code, $1.code);
+ }
+
+
 | EXTERN type_name declarator_list ';'
 ;
 
 declarator_list
-: declarator
+: declarator 
 | declarator_list ',' declarator
 ;
 
 type_name
-: VOID  
-| INT   
-| FLOAT
-| VOID '*' 
-| INT  '*' 
-| FLOAT '*'
+: VOID {asprintf(&$$.code,"%s", "VOID");}
+| INT  {asprintf(&$$.code,"%s","INT");}
+| FLOAT {asprintf(&$$.code,"FLOAT");}
+| VOID '*' {asprintf(&$$.code,"VOID*");}
+| INT  '*' {asprintf(&$$.code,"INT*");}
+| FLOAT '*' {asprintf(&$$.code,"FLOAT*");}
 ;
 
 declarator
-: IDENTIFIER
+: IDENTIFIER {$$.code = $1;}
 | IDENTIFIER '=' primary_expression
 | '(' declarator ')'
 | '(' '*'  IDENTIFIER ')' '(' argument_list ')'
@@ -280,6 +274,7 @@ int yyerror (char *s) {
 
 int main (int argc, char *argv[]) {
     FILE *input = NULL;
+	init();
     if (argc==2) {
 	input = fopen (argv[1], "r");
 	file_name = strdup (argv[1]);

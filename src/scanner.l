@@ -1,7 +1,7 @@
 %{
 #include <stdio.h>
 #include <string.h>
-#include "header.h"
+#include "table_symbol.h"
 #include "grammar.tab.h"
 
 void count();

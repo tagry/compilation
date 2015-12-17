@@ -4,12 +4,12 @@
 
 enum context_expression
 {
-	VARIABLE_GLOBALE, VARIABLE_LOCALE, ARGUMENT
+	VARIABLE_GLOBALE, VARIABLE_LOCALE, ARGUMENT, VOID
 };
 
 enum type_expression
 {
-	T_INT_TAB, T_FLOAT_TAB, T_INT, T_FLOAT, T_FONCT
+	T_INT_TAB, T_FLOAT_TAB, T_INT, T_FLOAT, T_FONCT, VOID
 };
 
 //Que pour les expression (pas besoin de table de symbole)
@@ -29,6 +29,53 @@ struct  symbol_t{
 	int complement;//nb de case pour un tableau, nb arg pour fonct
 };
 
+/*
+Hache le nom pour le retrouver dans la table
+ */
+int hachage(char *s);
 
+/*
+Recherche dans la table des symboles le nom s, renvoi l'élement si il le trouve, renvoi l'élement EMPTY sinon.
+ */
+struct symbol_t findtab(char *s);
+
+
+/*
+Recherche dans la table des symboles GLOBAL le nom s, renvoi 1 si trouvé et 0 sinon
+ */
+int rechercheGlobal(char *s);
+
+
+/*
+Recherche dans la table des symboles LOCAL le nom s, renvoi 1 si trouvé et 0 sinon
+ */
+int rechercheLocal(char *s);
+
+
+/*
+Recherche dans la table des symboles LOCAL puis GLOBAL le nom s, renvoi 1 si trouvé et 0 sinon
+ */
+int rechercheTout(char *s);
+
+/*
+Ajoute à la table un nouvel identificateur
+ */
+void addtab(char *s,enum type_expression type);
+
+/*
+Initialise la table à EMPTY
+ */
+void init();
+
+/*
+Passe la variable état en local
+ */
+void entreeFonction(void);
+
+
+/*
+Passe la variable état en local et initialise la table des symboles local à EMPTY
+ */
+void sortieFonction(void);
 
 
