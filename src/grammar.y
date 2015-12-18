@@ -16,6 +16,10 @@
       step++;
       return step;
     }
+	
+	FILE* fichier = fopen("log.txt", "w+");
+	if(fichier == NULL)
+		fprintf(stderr, "Le fichier ne s'ouvre pas");
 
 %}
 
@@ -45,7 +49,7 @@ primary_expression
 : IDENTIFIER {asprintf(&$$.code, "load %s", $1);}
 | CONSTANTI  {asprintf(&$$.code, "%s", $1); /*asprintf($$.code, "%%x%d = add i32 %s, 0",tmp_var_name(), $1);*/}
 | CONSTANTF  {asprintf(&$$.code,"%s",$1);/* asprintf($$.code, "%%x%d = add f32 %s, 0", tmp_var_name(), $1);*/}
-| '(' expression ')' {asprintf(&$$.code, "%s", $2.code);}
+| '(' expression ')' {asprintf(&$$.code, "%s", $1.code);}
 | MAP '(' postfix_expression ',' postfix_expression ')' 
 | REDUCE '(' postfix_expression ',' postfix_expression ')'
 | IDENTIFIER '(' ')'
@@ -65,7 +69,7 @@ postfix_expression
 ;
 
 argument_expression_list
-: expression
+: expression {$$.name = tmp_var_name(); $$.code = $1.code}
 | argument_expression_list ',' expression
 ;
 
@@ -220,31 +224,60 @@ expression
 			$$.type = T_INT;
 			tmp_var_name();
 			asprintf(&$$.code,"%%x%d = load i32* %s\nstore i32 %%x%d, %s\n",step, $3.var,step, $1.var);
+		} else if($1.type == T_FLOAT)
+		{
+			$$.type = T_FLOAT;
+			tmp_var_name();
+			asprintf(&$$.code,"%%x%d = load f32* %s\nstore f32 %%x%d, %s\n",step, $3.var,step, $1.var);
 		}
 				 
 	}
 	else if(strcmp($2.code, "*="))
 	{
-
+		if($1.type == T_FLOAT || $3.type == T_FLOAT)
+		{
+			$$.type = T_FLOAT;
+			tmp_var_name();
+			asprintf(&$$.code,"%%x%d = load f32* %s\n%%x%d = fmul f32 %s, %%x%d\nstore f32 %%x%d, %s\n", step, $3.var, step, $1.var, step, step, $1.var);
+		} else 
+		{
+			$$.type = T_INT;
+			tmp_var_name();
+			asprintf(&$$.code,"%%x%d = load i32* %s\n%%x%d = mul f32 %s, %%x%d\nstore i32 %%x%d, %s\n", step, $3.var, step, $1.var, step, step, $1.var);
+		}
 	}
 	else if(strcmp($2.code, "+="))
 	{
-
+		if($1.type == T_FLOAT || $3.type == T_FLOAT)
+		{
+			$$.type = T_FLOAT;
+			tmp_var_name();
+			asprintf(&$$.code,"%%x%d = load f32* %s\n%%x%d = fadd f32 %s, %%x%d\nstore f32 %%x%d, %s\n", step, $3.var, step, $1.var, step, step, $1.var);
+		} else 
+		{
+			$$.type = T_INT;
+			tmp_var_name();
+			asprintf(&$$.code,"%%x%d = load i32* %s\n%%x%d = add f32 %s, %%x%d\nstore i32 %%x%d, %s\n", step, $3.var, step, $1.var, step, step, $1.var);
+		}
 	}
 	else if(strcmp($2.code, "-="))
 	{
-
+		if($1.type == T_FLOAT || $3.type == T_FLOAT)
+		{
+			$$.type = T_FLOAT;
+			tmp_var_name();
+			asprintf(&$$.code,"%%x%d = load f32* %s\n%%x%d = fsub f32 %s, %%x%d\nstore f32 %%x%d, %s\n", step, $3.var, step, $1.var, step, step, $1.var);
+		} else 
+		{
+			$$.type = T_INT;
+			tmp_var_name();
+			asprintf(&$$.code,"%%x%d = load i32* %s\n%%x%d = sub f32 %s, %%x%d\nstore i32 %%x%d, %s\n", step, $3.var, step, $1.var, step, step, $1.var);
+		}
 	}
  }
 | comparison_expression {$$.type = INT; 
 							$$.name = tmp_var_name(); 
 							asprintf(&$$.code, "store i32 %s, i32 %%x%d\n",$1, tmp_var_name());}
-;
-
-
-argument_expression_list
-: expression
-| argument_expression_list ',' expression
 ;
 
 
@@ -271,6 +304,12 @@ declaration
 		
 	}
 	met_type($2.code, $1.code);
+	$$.type = $1.type;
+	$$.name = tmp_var_name();
+	if($1.type == T_INT)
+		asprintf(&$$.code, "store i32 %s, i32 %%x%d\n",$2, tmp_var_name());
+	else if($1.type == T_FLOAT)
+		asprintf(&$$.code, "store f32 %s, f32 %%x%d\n",$2, tmp_var_name());
  }
 
 
@@ -341,7 +380,7 @@ argument_list
 ;
 
 parameter_list
-: parameter_declaration
+: parameter_declaration {$$.name = tmp_var_name(); $$.code = $1.code}
 | parameter_list ',' parameter_declaration
 ;
 
@@ -350,11 +389,11 @@ parameter_declaration
 ;
 
 statement
-: compound_statement
-| expression_statement 
-| selection_statement
-| iteration_statement
-| jump_statement
+: compound_statement {$$.name = tmp_var_name(); $$.code = $1.code}
+| expression_statement {$$.name = tmp_var_name(); $$.code = $1.code}
+| selection_statement {$$.name = tmp_var_name(); $$.code = $1.code}
+| iteration_statement {$$.name = tmp_var_name(); $$.code = $1.code}
+| jump_statement {$$.name = tmp_var_name(); $$.code = $1.code}
 ;
 
 
@@ -365,23 +404,23 @@ compound_statement
 ;
 
 declaration_list
-: declaration
+: declaration {$$.name = tmp_var_name(); $$.code = $1.code}
 | declaration_list declaration
 ;
 
 statement_list
-: statement
+: statement {$$.name = tmp_var_name(); $$.code = $1.code}
 | statement_list statement
 ;
 
 expression_statement
 : ';'
-| expression ';'
+| expression ';' {$$.name = tmp_var_name(); $$.code = $1.code}
 ;
 
 selection_statement
-: IF '(' expression ')' statement
-| IF '(' expression ')' statement ELSE statement
+: IF '(' expression ')' statement 
+| IF '(' expression ')' statement ELSE statement {$$.name = tmp_var_name(); asprintf(&$$.code, "br i1 %%x%d, label %s, label %s", $1.var, $2, $3);}
 | FOR '(' expression_statement expression_statement expression ')' statement
 ;
 
@@ -395,13 +434,13 @@ jump_statement
 ;
 
 program
-: external_declaration
-| program external_declaration
+: external_declaration {$$.name = tmp_var_name(); asprintf(&$$.code, "%s\n", $1.code); fputs($$.code, fichier);}
+| program external_declaration {$$.name = tmp_var_name(); asprintf(&$$.code, "%s\n%s\n", $1.code, $2.code); fputs($$.code, fichier);}
 ;
 
 external_declaration
-: function_definition
-| declaration
+: function_definition {$$.name = tmp_var_name(); $$.code = $1.code;}
+| declaration {$$.name = tmp_var_name(); $$.code = $1.code;}
 ;
 
 function_definition
@@ -446,5 +485,6 @@ int main (int argc, char *argv[]) {
     }
     yyparse ();
     free (file_name);
+	fclose(fichier);
     return 0;
 }
