@@ -144,6 +144,7 @@ declaration
 		{
 			$2.code[i] = '\0';
 			met_type($2.code, $1.code);
+			met_classe_variable($2.code);
 			$2.code += i+1;// Décale le tableau apres la virgule
 			i = -1;
 		}
@@ -151,6 +152,7 @@ declaration
 		
 	}
 	met_type($2.code, $1.code);
+	met_classe_variable($2.code);
  }
 
 
@@ -226,7 +228,24 @@ parameter_list
 ;
 
 parameter_declaration
-: type_name declarator 
+: type_name declarator {
+	int i = 0;
+	while($2.code[i] != '\0')
+	{
+		if($2.code[i] == ',')
+		{
+			$2.code[i] = '\0';
+			met_type($2.code, $1.code);
+			met_classe_arg($2.code);
+			$2.code += i+1;// Décale le tableau apres la virgule
+			i = -1;
+		}
+		i++;
+		
+	}
+	met_type($2.code, $1.code);
+	met_classe_arg($2.code);
+ }
 ;
 
 statement
@@ -285,7 +304,9 @@ external_declaration
 ;
 
 function_definition
-: type_name declarator compound_statement {sortieFonction();} 
+: type_name declarator compound_statement {
+	
+	sortieFonction();} 
 ;
 
 %%

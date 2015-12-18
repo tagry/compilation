@@ -22,12 +22,13 @@ struct expression
 };
 
 //Que pour les symboles ! :
-struct  symbol_t{
+struct  symbol_t {
 	char *name;//nom de la variable si c'est une variable
 	char *var;// variable temporaire pour assembleur (pointeur)
 	int complement;//nb de case pour un tableau, nb arg pour fonct
 	enum type_expression type;
 	enum context_expression classe;
+	enum type_expression arg;//type des arguments pour les fonctions
 
 };
 
@@ -86,3 +87,15 @@ Détecte les déclaration multiple et arrete la compilation
 ET met l'identificateur dans la table des symboles !
  */
 void met_type(char *s, char* type);
+
+
+/*
+Met la classe de la variable (GLOBAL ou LOCAL)
+ */
+void met_classe_variable(char *s);
+
+
+/*
+Met la classe au argument
+ */
+void met_classe_arg(char *s);

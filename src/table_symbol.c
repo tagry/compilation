@@ -97,3 +97,16 @@ void met_type(char *s, char *type)
 		hachtab[hachage(s)][etat].type = T_FLOAT_P;
 	}
 }
+
+void met_classe_variable(char *s)
+{
+	if(etat == GLOBAL)
+		hachtab[hachage(s)][etat].classe = VARIABLE_GLOBALE;
+	else
+		hachtab[hachage(s)][etat].classe = VARIABLE_LOCALE;
+}
+
+void met_classe_arg(char *s)
+{
+	hachtab[hachage(s)][etat].classe = ARGUMENT;
+}
