@@ -136,8 +136,10 @@ additive_expression
 									asprintf(&$$.code, "store i32 %s, i32 %%x%d\n", $1, tmp_var_name());}
 | additive_expression '+' multiplicative_expression {if($2.type == T_FLOAT || $1.type == T_FLOAT) 
 														$$.type = T_FLOAT; 
-													else 
+													else if ($2.type == T_INT || $1.type == T_INT)
 														$$.type = T_INT; 
+													else 
+														$$.type = VOID;
 													$$.name = tmp_var_name(); 
 													if($2.type == T_FLOAT) 
 														asprintf(&$$.code, "%%x%d = fadd f32 %s, %s\n store f32 %%x%d, f32 %%x%d", tmp_var_name(), $1, $2, step, tmp_var_name()); 
@@ -145,8 +147,10 @@ additive_expression
 														asprintf(&$$.code, "%%x%d = add i32 %s, %s\n store i32 %%x%d, i32 %%x%d\n", tmp_var_name(), $1, $2, step, tmp_var_name());}
 | additive_expression '-' multiplicative_expression {if($2.type == T_FLOAT || $1.type == T_FLOAT) 
 														$$.type = T_FLOAT; 
-													else 
+													else if ($2.type == T_INT || $1.type == T_INT)
 														$$.type = T_INT; 
+													else 
+														$$.type = VOID;
 													$$.name = tmp_var_name(); 
 													if($2.type == T_FLOAT) 
 														asprintf(&$$.code, "%%x%d = fsub f32 %s, %s\n store f32 %%x%d, f32 %%x%d", tmp_var_name(), $1, $2, step, tmp_var_name()); 
