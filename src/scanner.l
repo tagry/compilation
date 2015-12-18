@@ -25,6 +25,7 @@ L[a-zA-Z_]
 "reduce"        { count(); return(REDUCE); }
 "extern"        { count(); return(EXTERN); }
 
+
 [$]?{L}({L}|{D})*	{ count(); yylval.string=strdup(yytext); return(IDENTIFIER); }
 {D}+    	{ count(); yylval.string=strdup(yytext); return(CONSTANTI); }
 {D}+"."{D}*     { count(); yylval.string=strdup(yytext); return(CONSTANTF); }
@@ -56,8 +57,9 @@ L[a-zA-Z_]
 "*"		{ count(); return('*'); }
 "<"		{ count(); return('<'); }
 ">"		{ count(); return('>'); }
-[ \t\v\n\f]	{ count(); }
+[ \t\v\n\f]	{ count();}
 .		{ /* ignore bad characters */ }
+
 
 %%
 int yywrap() {

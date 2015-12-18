@@ -17,6 +17,7 @@ struct expression
 {
 	char *code;
 	char *var;//(pointeur)
+	int complement;
 	enum type_expression type;  
 };
 
@@ -24,9 +25,10 @@ struct expression
 struct  symbol_t{
 	char *name;//nom de la variable si c'est une variable
 	char *var;// variable temporaire pour assembleur (pointeur)
-	enum context_expression classe;
-	enum type_expression type;
 	int complement;//nb de case pour un tableau, nb arg pour fonct
+	enum type_expression type;
+	enum context_expression classe;
+
 };
 
 /*
@@ -60,7 +62,7 @@ int rechercheTout(char *s);
 /*
 Ajoute à la table un nouvel identificateur
  */
-void addtab(char *s,enum type_expression type);
+void addtab(char *s);
 
 /*
 Initialise la table à EMPTY
@@ -81,5 +83,6 @@ void sortieFonction(void);
 
 /*
 Détecte les déclaration multiple et arrete la compilation
+ET met l'identificateur dans la table des symboles !
  */
-void detection_declaration_multiple(char *s, char *type);
+void met_type(char *s, char* type);

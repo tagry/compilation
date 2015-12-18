@@ -51,10 +51,9 @@ int rechercheTout(char *s)
 
 }
 
-void addtab(char *s,enum type_expression type) {
+void addtab(char *s) {
 	struct symbol_t *h=&hachtab[hachage(s)][etat];
 	h->name=s;
-	h->type=type;
 	h->var=NULL;
 }
 void init() {
@@ -74,34 +73,27 @@ void sortieFonction(void){
 }
 
 
-void detection_declaration_multiple(char *s, char *type)
+void met_type(char *s, char *type)
 {
-	if(rechercheTout(s))
+	if(!strcmp(type,"VOID"))
 	{
-		fprintf (stderr, "%s: Declaration Multiple : ERREUR\n", s);
+		fprintf (stderr, "%s: Pas de type \n", s);
 		return 1;
 	}
-	else
+	else if(!strcmp(type,"INT"))
 	{
-		if(!strcmp(type,"VOID"))
-		{
-			fprintf (stderr, "%s: Pas de type \n", s);
-		}
-		else if(!strcmp(type,"INT"))
-		{
-			addtab(s, T_INT);
-		}
-		else if(!strcmp(type,"FLOAT"))
-		{
-			addtab(s, T_FLOAT);
-		}
-		else if(!strcmp(type,"INT*"))
-		{
-			addtab(s, T_INT_P);
-		}
-		else if(!strcmp(type,"FLOAT*"))
-		{
-			addtab(s, T_FLOAT_P);
-		}
+	    hachtab[hachage(s)][etat].type = T_INT;
+	}
+	else if(!strcmp(type,"FLOAT"))
+	{
+		hachtab[hachage(s)][etat].type = T_FLOAT;
+	}
+	else if(!strcmp(type,"INT*"))
+	{
+		hachtab[hachage(s)][etat].type = T_INT_P;
+	}
+	else if(!strcmp(type,"FLOAT*"))
+	{
+		hachtab[hachage(s)][etat].type = T_FLOAT_P;
 	}
 }

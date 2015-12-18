@@ -138,18 +138,19 @@ assignment_operator
 declaration
 : type_name declarator_list ';' {
 	int i = 0;
-	for(i = 0; $2.code[i] != '\0';i++)
+	while($2.code[i] != '\0')
 	{
 		if($2.code[i] == ',')
 		{
 			$2.code[i] = '\0';
-			detection_declaration_multiple($2.code, $1.code);
+			met_type($2.code, $1.code);
 			$2.code += i+1;// Décale le tableau apres la virgule
-			i = 0;
+			i = -1;
 		}
+		i++;
 		
 	}
-	detection_declaration_multiple($2.code, $1.code);
+	met_type($2.code, $1.code);
  }
 
 
@@ -157,8 +158,8 @@ declaration
 ;
 
 declarator_list
-: declarator 
-| declarator_list ',' declarator
+: declarator
+| declarator_list ',' declarator {asprintf(&$$.code, "%s,%s", $1.code, $3.code);}
 ;
 
 type_name
@@ -171,15 +172,47 @@ type_name
 ;
 
 declarator
-: IDENTIFIER {$$.code = $1;}
-| IDENTIFIER '=' primary_expression
+: IDENTIFIER {
+	if(!rechercheTout($1))
+		addtab($1);
+	else
+		fprintf(stderr, "%s : Déclaration multiple ! ERREUR\n", $1);}
+
+| IDENTIFIER '=' primary_expression {
+	if(!rechercheTout($1))
+		addtab($1);
+	else
+		fprintf(stderr, "%s : Déclaration multiple ! ERREUR\n", $1);}
+
 | '(' declarator ')'
 | '(' '*'  IDENTIFIER ')' '(' argument_list ')'
-| declarator '[' CONSTANTI ']'
-| declarator '[' CONSTANTI ']''=' '{' argument_expression_list '}'
-| declarator '[' ']'
-| declarator '(' parameter_list ')'
-| declarator '(' ')'
+| IDENTIFIER '[' CONSTANTI ']' {
+	if(!rechercheTout($1))
+		addtab($1);
+	else
+		fprintf(stderr, "%s : Déclaration multiple ! ERREUR\n", $1);}
+
+| IDENTIFIER '[' CONSTANTI ']''=' '{' argument_expression_list '}'
+| IDENTIFIER '[' ']' {
+	if(!rechercheTout($1))
+		addtab($1);
+	else
+		fprintf(stderr, "%s : Déclaration multiple ! ERREUR\n", $1);}
+
+| IDENTIFIER '(' {entreeFonction();} parameter_list ')' {
+	if(!rechercheTout($1))
+		addtab($1);
+	else
+		fprintf(stderr, "%s : Déclaration multiple ! ERREUR\n", $1);
+	hachtab[hachage($1)];
+  }
+
+| IDENTIFIER '(' ')' {
+	if(!rechercheTout($1))
+		addtab($1);
+	else
+		fprintf(stderr, "%s : Déclaration multiple ! ERREUR\n", $1);
+  }
 ;
 
 argument_list
@@ -203,6 +236,7 @@ statement
 | iteration_statement
 | jump_statement
 ;
+
 
 compound_statement
 : '{' '}'
@@ -251,7 +285,7 @@ external_declaration
 ;
 
 function_definition
-: type_name declarator compound_statement
+: type_name declarator compound_statement {sortieFonction();} 
 ;
 
 %%
