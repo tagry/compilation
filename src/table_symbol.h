@@ -28,7 +28,7 @@ struct  symbol_t {
 	int complement;//nb de case pour un tableau, nb arg pour fonct
 	enum type_expression type;
 	enum context_expression classe;
-	enum type_expression arg;//type des arguments pour les fonctions
+	enum type_expression arg[50];//type des arguments pour les fonctions
 
 };
 

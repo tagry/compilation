@@ -304,7 +304,13 @@ external_declaration
 ;
 
 function_definition
-: type_name declarator compound_statement {
+: type_name declarator {
+	int i = 0;
+	int fonct = 0;
+	for(i = 0; hachtab[i][GLOBAL].classe != FONCT; i++);
+	fonct = i;
+ }
+compound_statement {
 	
 	sortieFonction();} 
 ;
