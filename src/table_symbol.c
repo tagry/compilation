@@ -3,7 +3,9 @@
 #define GLOBAL 0
 #define LOCAL 1
 
-int etat = 0; //defini si on est en global ou en local
+int etat = GLOBAL; //defini si on est en global ou en local
+int appel_arg = 0; // variable qui compte les argument donner à une fonctionx
+char *fonction;
 
 struct symbol_t EMPTY={"","",C_VOID,T_VOID,0}; // un symbole vide
 struct symbol_t hachtab[SIZE][2];

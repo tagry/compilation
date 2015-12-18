@@ -49,7 +49,10 @@ primary_expression
 | MAP '(' postfix_expression ',' postfix_expression ')' 
 | REDUCE '(' postfix_expression ',' postfix_expression ')'
 | IDENTIFIER '(' ')'
-| IDENTIFIER '(' argument_expression_list ')'
+| IDENTIFIER '(' {
+	appel_arg = hachtab[hachage($1)][GLOBAL].complement;
+	asprintf(&fonction, "%s", $1);
+  } argument_expression_list ')'
 | IDENTIFIER INC_OP
 | IDENTIFIER DEC_OP
 | IDENTIFIER '[' expression ']'
@@ -60,8 +63,30 @@ postfix_expression
 ;
 
 argument_expression_list
-: expression
-| argument_expression_list ',' expression
+: expression {
+    if($1.type != hachtab[hachage(fonction)][GLOBAL].arg[appel_arg])
+	{
+		fprintf(stderr, "Dans fonction : %s pas bon type pour l'argument %d\n", fonction, appel_arg+1);
+		return 1;
+	}
+	else if(appel_arg != 0)
+		fprintf(stderr, "Dans fonction : %s pas bon nombre d'argument\n", fonction);
+	else
+		appel_arg--;
+ }
+| argument_expression_list ',' expression {
+    if($3.type != hachtab[hachage(fonction)][GLOBAL].arg[appel_arg])
+	{
+		fprintf(stderr, "Dans fonction : %s pas bon type pour l'argument %d\n", fonction, appel_arg+1);
+		return 1;
+	}
+	
+	else if(appel_arg < 0)
+		fprintf(stderr, "Dans fonction : %s pas bon nombre d'argument\n", fonction);
+
+	else
+		appel_arg--;
+  }
 ;
 
 unary_expression
@@ -203,7 +228,10 @@ declarator
 
 | IDENTIFIER '(' {entreeFonction();} parameter_list ')' {
 	if(!rechercheTout($1))
+	{
 		addtab($1);
+		hachtab[hachage($1)][GLOBAL].classe = FONCT;
+	}
 	else
 		fprintf(stderr, "%s : Déclaration multiple ! ERREUR\n", $1);
 	hachtab[hachage($1)];
@@ -211,7 +239,10 @@ declarator
 
 | IDENTIFIER '(' ')' {
 	if(!rechercheTout($1))
+	{
 		addtab($1);
+		hachtab[hachage($1)][GLOBAL].classe = FONCT;
+	}
 	else
 		fprintf(stderr, "%s : Déclaration multiple ! ERREUR\n", $1);
   }
@@ -309,6 +340,17 @@ function_definition
 	int fonct = 0;
 	for(i = 0; hachtab[i][GLOBAL].classe != FONCT; i++);
 	fonct = i;
+
+	hachtab[fonct][GLOBAL].complement = 0;
+
+	for(i = 0;i < SIZE; i++)
+	{
+		if(hachtab[i][LOCAL].classe == ARGUMENT)
+		{
+			hachtab[fonct][GLOBAL].arg[hachtab[fonct][GLOBAL].complement] = hachtab[i][LOCAL].type;
+			hachtab[fonct][GLOBAL].complement++;
+		}
+	}
  }
 compound_statement {
 	

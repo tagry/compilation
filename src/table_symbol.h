@@ -18,7 +18,7 @@ struct expression
 	char *code;
 	char *var;//(pointeur)
 	int complement;
-	enum type_expression type;  
+	enum type_expression type;
 };
 
 //Que pour les symboles ! :
