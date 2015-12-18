@@ -42,17 +42,23 @@
 
 
 primary_expression
-: IDENTIFIER {asprintf(&$$.code, "load %s", $1);}
-| CONSTANTI  {asprintf(&$$.code, "%s", $1); /*asprintf($$.code, "%%x%d = add i32 %s, 0",tmp_var_name(), $1);*/}
-| CONSTANTF  {asprintf(&$$.code,"%s",$1);/* asprintf($$.code, "%%x%d = add f32 %s, 0", tmp_var_name(), $1);*/}
+: IDENTIFIER {$$.type = hachtab[hachage($1)][etat].type; asprintf(&$$.code, "load %s", $1);}
+| CONSTANTI  {$$.type = T_INT; asprintf(&$$.code, "%s", $1); /*asprintf($$.code, "%%x%d = add i32 %s, 0",tmp_var_name(), $1);*/}
+| CONSTANTF  {$$.type = T_FLOAT; asprintf(&$$.code,"%s",$1);/* asprintf($$.code, "%%x%d = add f32 %s, 0", tmp_var_name(), $1);*/}
 | '(' expression ')' {asprintf(&$$.code, "%s", $2.code);}
 | MAP '(' postfix_expression ',' postfix_expression ')' 
 | REDUCE '(' postfix_expression ',' postfix_expression ')'
-| IDENTIFIER '(' ')'
+| IDENTIFIER '(' ')' {
+	appel_arg = hachtab[hachage($1)][GLOBAL].complement;
+	asprintf(&fonction, "%s", $1);
+  }
 | IDENTIFIER '(' {
 	appel_arg = hachtab[hachage($1)][GLOBAL].complement;
 	asprintf(&fonction, "%s", $1);
-  } argument_expression_list ')'
+  } argument_expression_list ')' {
+	  if(appel_arg > 0)
+		  fprintf(stderr, "Dans fonction : %s pas bon nombre d'argument\n", fonction);
+	}
 | IDENTIFIER INC_OP
 | IDENTIFIER DEC_OP
 | IDENTIFIER '[' expression ']'
@@ -64,26 +70,30 @@ postfix_expression
 
 argument_expression_list
 : expression {
-    if($1.type != hachtab[hachage(fonction)][GLOBAL].arg[appel_arg])
+	if(appel_arg < 0)
+	{
+		fprintf(stderr, "Dans fonction : %s pas bon nombre d'argument\n", fonction);
+	}
+    else if($1.type != hachtab[hachage(fonction)][GLOBAL].arg[appel_arg])
 	{
 		fprintf(stderr, "Dans fonction : %s pas bon type pour l'argument %d\n", fonction, appel_arg+1);
 		return 1;
 	}
-	else if(appel_arg != 0)
-		fprintf(stderr, "Dans fonction : %s pas bon nombre d'argument\n", fonction);
 	else
 		appel_arg--;
  }
 | argument_expression_list ',' expression {
-    if($3.type != hachtab[hachage(fonction)][GLOBAL].arg[appel_arg])
+	if(appel_arg < 0)
+	{
+		fprintf(stderr, "Dans fonction : %s pas bon nombre d'argument\n", fonction);
+		return 1;
+	}
+	else if($3.type != hachtab[hachage(fonction)][GLOBAL].arg[appel_arg])
 	{
 		fprintf(stderr, "Dans fonction : %s pas bon type pour l'argument %d\n", fonction, appel_arg+1);
 		return 1;
 	}
 	
-	else if(appel_arg < 0)
-		fprintf(stderr, "Dans fonction : %s pas bon nombre d'argument\n", fonction);
-
 	else
 		appel_arg--;
   }
@@ -226,7 +236,7 @@ declarator
 	else
 		fprintf(stderr, "%s : Déclaration multiple ! ERREUR\n", $1);}
 
-| IDENTIFIER '(' {entreeFonction();} parameter_list ')' {
+| IDENTIFIER '(' {asprintf(&fonction, "%s", $1); entreeFonction(); appel_arg = 0;} parameter_list ')' {
 	if(!rechercheTout($1))
 	{
 		addtab($1);
@@ -340,9 +350,8 @@ function_definition
 	int fonct = 0;
 	for(i = 0; hachtab[i][GLOBAL].classe != FONCT; i++);
 	fonct = i;
-
+	
 	hachtab[fonct][GLOBAL].complement = 0;
-
 	for(i = 0;i < SIZE; i++)
 	{
 		if(hachtab[i][LOCAL].classe == ARGUMENT)
