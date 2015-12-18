@@ -21,7 +21,7 @@
 
 %token <string> IDENTIFIER CONSTANTF CONSTANTI
 %token MAP REDUCE EXTERN
-%token INC_OP DEC_OP LE_OP GE_OP EQ_OP NE_OP OU_OP ET_OP
+%token INC_OP DEC_OP LE_OP GE_OP EQ_OP NE_OP OU_OP ET_OP 
 %token SUB_ASSIGN MUL_ASSIGN ADD_ASSIGN
 %token TYPE_NAME
 %token INT FLOAT VOID
@@ -45,7 +45,7 @@ primary_expression
 : IDENTIFIER {$$.type = hachtab[hachage($1)][etat].type; asprintf(&$$.code, "load %s", $1);}
 | CONSTANTI  {$$.type = T_INT; asprintf(&$$.code, "%s", $1); /*asprintf($$.code, "%%x%d = add i32 %s, 0",tmp_var_name(), $1);*/}
 | CONSTANTF  {$$.type = T_FLOAT; asprintf(&$$.code,"%s",$1);/* asprintf($$.code, "%%x%d = add f32 %s, 0", tmp_var_name(), $1);*/}
-| '(' expression ')' {asprintf(&$$.code, "%s", $2.code);}
+| '(' expression ')' {asprintf(&$$.code, "%s", $1.code);}
 | MAP '(' postfix_expression ',' postfix_expression ')' 
 | REDUCE '(' postfix_expression ',' postfix_expression ')'
 | IDENTIFIER '(' ')' {
@@ -59,15 +59,15 @@ primary_expression
 	  if(appel_arg > 0)
 		  fprintf(stderr, "Dans fonction : %s pas bon nombre d'argument\n", fonction);
 	}
-| IDENTIFIER INC_OP
-| IDENTIFIER DEC_OP
-| IDENTIFIER '[' expression ']'
+| IDENTIFIER INC_OP {$$.type = VOID;}
+| IDENTIFIER DEC_OP {$$.type = VOID;}
+| IDENTIFIER '[' expression ']' 
 ;
 
 postfix_expression
 : primary_expression {$$.type = $1.type; 
 						$$.name = tmp_var_name(); 
-						if($2.type == FLOAT) 
+						if($1.type == FLOAT) 
 							asprintf(&$$.code, "store f32 %s, f32 %%x%d\n", $1, tmp_var_name()); 
 						else 
 							asprintf(&$$.code, "store i32 %s, i32 %%x%d\n", $1, tmp_var_name());}
@@ -85,7 +85,9 @@ argument_expression_list
 		return 1;
 	}
 	else
-		appel_arg--;
+		appel_arg
+	$$.type = $1.type;
+	$$.code = $1.code;
  }
 | argument_expression_list ',' expression {
 	if(appel_arg < 0)
@@ -93,7 +95,7 @@ argument_expression_list
 		fprintf(stderr, "Dans fonction : %s pas bon nombre d'argument\n", fonction);
 		return 1;
 	}
-	else if($3.type != hachtab[hachage(fonction)][GLOBAL].arg[appel_arg])
+	else if($2.type != hachtab[hachage(fonction)][GLOBAL].arg[appel_arg])
 	{
 		fprintf(stderr, "Dans fonction : %s pas bon type pour l'argument %d\n", fonction, appel_arg+1);
 		return 1;
@@ -107,28 +109,32 @@ argument_expression_list
 unary_expression
 : postfix_expression {$$.type = $1.type; 
 						$$.name = tmp_var_name(); 
-						if($2.type == FLOAT) 
+						if($1.type == FLOAT) 
 							asprintf(&$$.code, "store f32 %s, f32 %%x%d\n", $1, tmp_var_name()); 
 						else 
-							asprintf(&$$.code, "store i32 %s, i32 %%x%d\n", $1, tmp_var_name());}
+							asprintf(&$$.code, "store i32 %s, i32 %%x%d\n", $1, tmp_var_name());
+						}
 | INC_OP unary_expression {$$.type = $1.type; 
 							$$.name = tmp_var_name(); 
-							if($2.type == T_FLOAT) 
+							if($1.type == T_FLOAT) 
 								asprintf(&$$.code, "%%x%d = fadd f32 %s, 1\n store f32 %%x%d, f32 %%x%d", tmp_var_name(), $1, step, tmp_var_name()); 
 							else 
-								asprintf(&$$.code, "%%x%d = add i32 %s, 1\n store i32 %%x%d, i32 %%x%d\n", tmp_var_name(), $1, step, tmp_var_name());}
+								asprintf(&$$.code, "%%x%d = add i32 %s, 1\n store i32 %%x%d, i32 %%x%d\n", tmp_var_name(), $1, step, tmp_var_name());
+							}
 | DEC_OP unary_expression {$$.type = $1.type; 
 							$$.name = tmp_var_name(); 
-							if($2.type == T_FLOAT) 
+							if($1.type == T_FLOAT) 
 								asprintf(&$$.code, "%%x%d = fsub f32 %s, 1\n store f32 %%x%d, f32 %%x%d", tmp_var_name(), $1, step, tmp_var_name()); 
 							else 
-								asprintf(&$$.code, "%%x%d = sub i32 %s, 1\n store i32 %%x%d, i32 %%x%d\n", tmp_var_name(), $1, step, tmp_var_name());}
+								asprintf(&$$.code, "%%x%d = sub i32 %s, 1\n store i32 %%x%d, i32 %%x%d\n", tmp_var_name(), $1, step, tmp_var_name());
+							}
 | unary_operator unary_expression {$$.type = $2.type; 
 									$$.name = tmp_var_name(); 
 									if($2.type == FLOAT) 
 										asprintf(&$$.code, "%%x%d = fsub f32 0, %s\n store f32 %%x%d, f32 %%x%d", tmp_var_name(), $1, step, tmp_var_name()); 
 									else 
-										asprintf(&$$.code, "%%x%d = sub i32 0, %s\n store i32 %%x%d, i32 %%x%d\n", tmp_var_name(), $1, step, tmp_var_name());}
+										asprintf(&$$.code, "%%x%d = sub i32 0, %s\n store i32 %%x%d, i32 %%x%d\n", tmp_var_name(), $1, step, tmp_var_name());
+									}
 ;
 
 
@@ -142,7 +148,8 @@ multiplicative_expression
 						if($2.type == T_FLOAT) 
 							asprintf(&$$.code, "store f32 %s, f32 %%x%d\n", $1, tmp_var_name()); 
 						else 
-							asprintf(&$$.code, "store i32 %s, i32 %%x%d\n", $1, tmp_var_name());} 
+							asprintf(&$$.code, "store i32 %s, i32 %%x%d\n", $1, tmp_var_name());
+						} 
 | multiplicative_expression '*' unary_expression    {if($2.type == T_FLOAT || $1.type == T_FLOAT) 
 														$$.type = T_FLOAT; 
 													else 
@@ -151,10 +158,12 @@ multiplicative_expression
 													if($2.type == T_FLOAT) 
 														asprintf(&$$.code, "%%x%d = fmul f32 %s, %s\n store f32 %%x%d, f32 %%x%d", tmp_var_name(), $1, $2, step, tmp_var_name()); 
 													else 
-														asprintf(&$$.code, "%%x%d = mul i32 %s, %s\n store i32 %%x%d, i32 %%x%d\n", tmp_var_name(), $1, $2, step, tmp_var_name());}
+														asprintf(&$$.code, "%%x%d = mul i32 %s, %s\n store i32 %%x%d, i32 %%x%d\n", tmp_var_name(), $1, $2, step, tmp_var_name());
+													}
 | multiplicative_expression '/' unary_expression {$$.type = T_FLOAT; 
 													$$.name = tmp_var_name(); 
-													asprintf(&$$.code, "%%x%d = fdiv f32 %s, %s\n store f32 %%x%d, f32 %%x%d", tmp_var_name(), $1, $2, step, tmp_var_name());}
+													asprintf(&$$.code, "%%x%d = fdiv f32 %s, %s\n store f32 %%x%d, f32 %%x%d", tmp_var_name(), $1, $2, step, tmp_var_name());
+													}
 ;
 
 
@@ -164,7 +173,8 @@ additive_expression
 								if($2.type == T_FLOAT) 
 									asprintf(&$$.code, "store f32 %s, f32 %%x%d\n", $1, tmp_var_name()); 
 								else 
-									asprintf(&$$.code, "store i32 %s, i32 %%x%d\n", $1, tmp_var_name());}
+									asprintf(&$$.code, "store i32 %s, i32 %%x%d\n", $1, tmp_var_name());
+								}
 | additive_expression '+' multiplicative_expression {if($2.type == T_FLOAT || $1.type == T_FLOAT) 
 														$$.type = T_FLOAT; 
 													else 
@@ -173,7 +183,8 @@ additive_expression
 													if($2.type == T_FLOAT) 
 														asprintf(&$$.code, "%%x%d = fadd f32 %s, %s\n store f32 %%x%d, f32 %%x%d", tmp_var_name(), $1, $2, step, tmp_var_name()); 
 													else 
-														asprintf(&$$.code, "%%x%d = add i32 %s, %s\n store i32 %%x%d, i32 %%x%d\n", tmp_var_name(), $1, $2, step, tmp_var_name());}
+														asprintf(&$$.code, "%%x%d = add i32 %s, %s\n store i32 %%x%d, i32 %%x%d\n", tmp_var_name(), $1, $2, step, tmp_var_name());
+													}
 | additive_expression '-' multiplicative_expression {if($2.type == T_FLOAT || $1.type == T_FLOAT) 
 														$$.type = T_FLOAT; 
 													else 
@@ -182,68 +193,79 @@ additive_expression
 													if($2.type == T_FLOAT) 
 														asprintf(&$$.code, "%%x%d = fsub f32 %s, %s\n store f32 %%x%d, f32 %%x%d", tmp_var_name(), $1, $2, step, tmp_var_name()); 
 													else 
-														asprintf(&$$.code, "%%x%d = sub i32 %s, %s\n store i32 %%x%d, i32 %%x%d\n", tmp_var_name(), $1, $2, step, tmp_var_name());}
+														asprintf(&$$.code, "%%x%d = sub i32 %s, %s\n store i32 %%x%d, i32 %%x%d\n", tmp_var_name(), $1, $2, step, tmp_var_name());
+													}
 ;
 
 
 comparison_expression
 : additive_expression {$$.type = INT; 
 						$$.name = tmp_var_name(); 
-						asprintf(&$$.code, "store i32 %s, i32 %%x%d\n",$1, tmp_var_name());}
+						asprintf(&$$.code, "store i32 %s, i32 %%x%d\n",$1, tmp_var_name());
+						}
 | '!' additive_expression {$$.type = INT; 
 							$$.name = tmp_var_name(); 
 							if($1) 
 								asprintf(&$$.code, "store i32 0, i32 %%x%d\n",tmp_var_name()); 
 							else 
-								asprintf(&$$.code, "store i32 1, i32 %%x%d\n",tmp_var_name());}
+								asprintf(&$$.code, "store i32 1, i32 %%x%d\n",tmp_var_name());
+							}
 | additive_expression '<' additive_expression {$$.type = INT; 
 												$$.name = tmp_var_name(); 
 												if($1 < $2) 
 													asprintf(&$$.code, "store i32 1, i32 %%x%d\n",tmp_var_name()); 
 												else 
-													asprintf(&$$.code, "store i32 0, i32 %%x%d\n",tmp_var_name());}
+													asprintf(&$$.code, "store i32 0, i32 %%x%d\n",tmp_var_name());
+												}
 | additive_expression '>' additive_expression {$$.type = INT; 
 												$$.name = tmp_var_name(); 
 												if($1 > $2) 
 													asprintf(&$$.code, "store i32 1, i32 %%x%d\n",tmp_var_name()); 
 												else 
-													asprintf(&$$.code, "store i32 0, i32 %%x%d\n",tmp_var_name());}
+													asprintf(&$$.code, "store i32 0, i32 %%x%d\n",tmp_var_name());
+												}
 | additive_expression ET_OP additive_expression {$$.type = INT; 
 													$$.name = tmp_var_name(); 
 													if($1 && $2) 
 														asprintf(&$$.code, "store i32 1, i32 %%x%d\n",tmp_var_name()); 
 													else 
-														asprintf(&$$.code, "store i32 0, i32 %%x%d\n",tmp_var_name());}
+														asprintf(&$$.code, "store i32 0, i32 %%x%d\n",tmp_var_name());
+													}
 | additive_expression OU_OP additive_expression {$$.type = INT; 
 													$$.name = tmp_var_name(); 
 													if($1 || $2) 
 														asprintf(&$$.code, "store i32 1, i32 %%x%d\n",tmp_var_name()); 
 													else 
-														asprintf(&$$.code, "store i32 0, i32 %%x%d\n",tmp_var_name());}
+														asprintf(&$$.code, "store i32 0, i32 %%x%d\n",tmp_var_name());
+													}
 | additive_expression LE_OP additive_expression {$$.type = INT; 
 													$$.name = tmp_var_name(); 
 													if($1 <= $2) 
 														asprintf(&$$.code, "store i32 1, i32 %%x%d\n",tmp_var_name()); 
 													else 
-														asprintf(&$$.code, "store i32 0, i32 %%x%d\n",tmp_var_name());}
+														asprintf(&$$.code, "store i32 0, i32 %%x%d\n",tmp_var_name());
+													}
 | additive_expression GE_OP additive_expression {$$.type = INT; 
 													$$.name = tmp_var_name(); 
 													if($1 >= $2) 
 														asprintf(&$$.code, "store i32 1, i32 %%x%d\n",tmp_var_name()); 
 													else 
-														asprintf(&$$.code, "store i32 0, i32 %%x%d\n",tmp_var_name());}
+														asprintf(&$$.code, "store i32 0, i32 %%x%d\n",tmp_var_name());
+													}
 | additive_expression EQ_OP additive_expression {$$.type = INT; 
 													$$.name = tmp_var_name(); 
 													if($1 == $2) 
 														asprintf(&$$.code, "store i32 1, i32 %%x%d\n",tmp_var_name()); 
 													else 
-														asprintf(&$$.code, "store i32 0, i32 %%x%d\n",tmp_var_name());}
+														asprintf(&$$.code, "store i32 0, i32 %%x%d\n",tmp_var_name());
+													}
 | additive_expression NE_OP additive_expression {$$.type = INT; 
 													$$.name = tmp_var_name(); 
 													if($1 != $2) 
 														asprintf(&$$.code, "store i32 1, i32 %%x%d\n",tmp_var_name()); 
 													else 
-														asprintf(&$$.code, "store i32 0, i32 %%x%d\n",tmp_var_name());}
+														asprintf(&$$.code, "store i32 0, i32 %%x%d\n",tmp_var_name());
+													}
 ;
 
 expression
