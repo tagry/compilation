@@ -66,7 +66,9 @@
 
 primary_expression
 : IDENTIFIER {$$.name = tmp_var_name();}
-| CONSTANTI {$$.type = T_INT; $$.name = tmp_var_name(); asprintf($$.code, "%%x%d = add i32 %s, 0\n",tmp_var_name(), $1);}
+| CONSTANTI {$$.type = T_INT; 
+				$$.name = tmp_var_name(); 
+				asprintf($$.code, "%%x%d = add i32 %s, 0\n",tmp_var_name(), $1);}
 | CONSTANTF {$$.type = T_FLOAT; $$.name = tmp_var_name(); asprintf($$.code, "%%x%d = add f32 %s, 0\n", tmp_var_name(), $1);}
 | '(' expression ')'
 | MAP '(' postfix_expression ',' postfix_expression ')'
