@@ -1,7 +1,7 @@
 %{
 #include <stdio.h>
 #include <string.h>
-#include "header.h"
+#include "table_symbol.h"
 #include "grammar.tab.h"
 
 void count();
@@ -24,6 +24,7 @@ L[a-zA-Z_]
 "map"           { count(); return(MAP); }
 "reduce"        { count(); return(REDUCE); }
 "extern"        { count(); return(EXTERN); }
+
 
 [$]?{L}({L}|{D})*	{ count(); yylval.string=strdup(yytext); return(IDENTIFIER); }
 {D}+    	{ count(); yylval.string=strdup(yytext); return(CONSTANTI); }
@@ -56,8 +57,9 @@ L[a-zA-Z_]
 "*"		{ count(); return('*'); }
 "<"		{ count(); return('<'); }
 ">"		{ count(); return('>'); }
-[ \t\v\n\f]	{ count(); }
+[ \t\v\n\f]	{ count();}
 .		{ /* ignore bad characters */ }
+
 
 %%
 int yywrap() {

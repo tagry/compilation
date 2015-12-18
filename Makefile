@@ -3,7 +3,7 @@ BUILD=build
 LEX=lex
 YACC=bison
 CFLAGS=-Wall
-CC=gcc
+CC=gcc -O0 -g
 
 EXPRESSION= 
 
@@ -104,4 +104,5 @@ testNV:parse
 
 clean:
 	rm -f build/*
-	cp $(SRC)/header.h $(BUILD)
+	cp $(SRC)/table_symbol.h $(BUILD)
+	cp $(SRC)/table_symbol.c $(BUILD)

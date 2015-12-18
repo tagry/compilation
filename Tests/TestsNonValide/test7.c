@@ -9,3 +9,4 @@ int main()
 	g(x); // int attendu donner x
 	return 0;
 }
+
