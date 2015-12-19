@@ -1,12 +1,12 @@
 %{
-	#define _GNU_SOURCE
-    #include <stdio.h>
-    #include <string.h>
-    #include <stdlib.h>
-	#include "table_symbol.c"
+#define _GNU_SOURCE
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include "table_symbol.c"
 	
     extern int yylineno;
-
+	
     int step=0;
     int yylex ();
     int yyerror ();
@@ -14,29 +14,29 @@
 	
     int tmp_var_name()
     {
-      step++;
-      return step;
+		step++;
+		return step;
     }
 	
 	int condd = 0; 
 	char* cond()
 	{
-	condd++;
-	char *texte;
-	asprintf(&texte, "cond%d", condd);
-	return texte;
+		condd++;
+		char *texte;
+		asprintf(&texte, "cond%d", condd);
+		return texte;
 	}
 	
 	int labl = 0;
 	char* label()
 	{
-	char* txt;
-	asprintf(&txt, "label%d", labl);
-	return txt;
+		char* txt;
+		asprintf(&txt, "label%d", labl);
+		return txt;
 	}
 	
-
-%}
+	
+	%}
 
 %token <string> IDENTIFIER CONSTANTF CONSTANTI
 %token MAP REDUCE EXTERN
@@ -475,11 +475,7 @@ selection_statement
 				cond1 = cond();
 				label1 = label();
 				label2 = label();
-				asprintf(&$$.code, "%s = %s\n
-									br i1 %s, label %s, label %s \n
-									%s: \n
-									%s \n
-									%s: \n", cond1, $3.code, cond1, label1, label2, label1, $5.code, label2);
+				asprintf(&$$.code, "%s = %s\nbr i1 %s, label %s, label %s \n%s: \n%s \n%s: \n", cond1, $3.code, cond1, label1, label2, label1, $5.code, label2);
 				}
 | IF '(' expression ')' statement ELSE statement {
 				asprintf(&$$.name, "%%x%d", tmp_var_name()); 
@@ -487,12 +483,7 @@ selection_statement
 				label1 = label();
 				label2 = label();
 				label3 = label();
-				asprintf(&$$.code, "%%%s = %s\n
-									br i1 %%%s, label %%%s, label %%%s\n
-									%s:\n
-									%s\n
-									%s:\n
-									%s\n", cond, $3.var, cond, label1, label2, label1, $5.code, label2, $7.code);
+				asprintf(&$$.code, "%%%s = %s\nbr i1 %%%s, label %%%s, label %%%s\n%s:\n%s\n%s:\n%s\n", cond, $3.var, cond, label1, label2, label1, $5.code, label2, $7.code);
 				}
 | FOR '(' expression_statement expression_statement expression ')' statement {
 				asprintf(&$$.name, "%%x%d", tmp_var_name()); 
@@ -500,15 +491,7 @@ selection_statement
 				label1 = label();
 				label2 = label();
 				label3 = label();
-				asprintf(&$$.code, "%s \n
-									%%%s = %s \n
-									%s: \n
-									br i1 %%%s, label %%%s, label %%%s \n
-									%s: \n
-									%s \n
-									%s \n
-									br %s \n
-									%s: \n", $3.code, cond, $4.code, label3, cond, label1, label2, label1, $7.code, $5.code, label3, label2);
+				asprintf(&$$.code, "%s \n%%%s = %s \n%s: \n	br i1 %%%s, label %%%s, label %%%s \n%s: \n%s \n%s \nbr %s \n%s: \n", $3.code, cond, $4.code, label3, cond, label1, label2, label1, $7.code, $5.code, label3, label2);
 				}
 ;
 
@@ -518,13 +501,7 @@ iteration_statement
 										label1 = label();
 										label2 = label();
 										label3 = label();
-										asprintf(&$$.code, "%%%s = %s \n
-															%s: \n
-															br i1 %%%s, label %%%s, label %%%s \n
-															%s: \n
-															%s \n
-															br %s \n
-															%s: \n", cond, $3.code, label1, cond, label2, label3, label2, $5.code, label1, label3);
+										asprintf(&$$.code, "%%%s = %s \n%s: \nbr i1 %%%s, label %%%s, label %%%s \n%s: \n%s \nbr %s \n%s: \n", cond, $3.code, label1, cond, label2, label3, label2, $5.code, label1, label3);
 										}
 ;
 
@@ -544,17 +521,14 @@ external_declaration
 ;
 
 function_definition
-<<<<<<< HEAD
-: type_name declarator compound_statement {$$.type = $1.type; sortieFonction();} 
-=======
 : type_name declarator compound_statement {
 	sortieFonction();
+	$$.type = $1.type;
 	if(!strcmp($1.code, "INT"))
 		asprintf(&$$.code, "define i32 %s { %s }", $2.code, $3.code);
 	else if(!strcmp($1.code, "FLOAT"))
 		asprintf(&$$.code, "define float %s { %s }", $2.code, $3.code);
  } 
->>>>>>> origin/Compil-Nico
 ;
 
 %%
