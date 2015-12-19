@@ -46,6 +46,10 @@ testV:parse
 	./build/parse Tests/TestsValides/test12.c
 	echo ###############TEST13###############	
 	./build/parse Tests/TestsValides/test13.c
+	echo ###############TEST14###############		
+	./build/parse Tests/TestsValides/test14.c
+	echo ###############TEST15###############	
+	./build/parse Tests/TestsValides/test15.c
 
 testNV:parse
 	clear

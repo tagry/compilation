@@ -17,6 +17,7 @@ struct expression
 {
 	char *code;
 	char *var;//(pointeur)
+	char *name;
 	int complement;
 	enum type_expression type;  
 };
