@@ -386,7 +386,10 @@ declarator
 
 | IDENTIFIER '(' {entreeFonction();} parameter_list ')' {
 	if(!rechercheTout($1))
+	{
 		addtab($1);
+		asprintf(&$$.code, "%s (%s)", $1, $4.code);
+	}
 	else
 		fprintf(stderr, "%s : Déclaration multiple ! ERREUR\n", $1);
 	hachtab[hachage($1)];
@@ -394,7 +397,10 @@ declarator
 
 | IDENTIFIER '(' ')' {
 	if(!rechercheTout($1))
+	{
 		addtab($1);
+		asprintf(&$$.code, "%s ()", $1);
+	}
 	else
 		fprintf(stderr, "%s : Déclaration multiple ! ERREUR\n", $1);
   }
@@ -424,9 +430,9 @@ statement
 
 
 compound_statement
-: '{' '}'
-| '{' statement_list '}'
-| '{' declaration_list statement_list '}'
+: '{' '}' {asprintf(&$$.code, " ");}
+| '{' statement_list '}' {asprintf(&$$.code, "%s", $2.code);}
+| '{' declaration_list statement_list '}' {asprintf(&$$.code, "%s %s", $2.code, $3.code);}
 ;
 
 declaration_list
@@ -470,7 +476,13 @@ external_declaration
 ;
 
 function_definition
-: type_name declarator compound_statement {sortieFonction();} 
+: type_name declarator compound_statement {
+	sortieFonction();
+	if(!strcmp($1.code, "INT"))
+		asprintf(&$$.code, "define i32 %s { %s }", $2.code, $3.code);
+	else if(!strcmp($1.code, "FLOAT"))
+		asprintf(&$$.code, "define float %s { %s }", $2.code, $3.code);
+ } 
 ;
 
 %%
@@ -495,12 +507,13 @@ int main (int argc, char *argv[]) {
     FILE *input = NULL;
 
 	fichier = NULL;
-	fichier = fopen("log.txt", "w+");
+	fprintf(stderr, "\ncoucou %s\n", argv[2]);
+	fichier = fopen(argv[2], "w+");
 	if(fichier == NULL)
 		fprintf(stderr, "Le fichier ne s'ouvre pas");
 	
 	init();
-    if (argc==2) {
+    if (argc==3) {
 	input = fopen (argv[1], "r");
 	file_name = strdup (argv[1]);
 	if (input) {
