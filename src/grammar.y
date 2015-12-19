@@ -11,11 +11,30 @@
     int yylex ();
     int yyerror ();
 	FILE *fichier;
+	
     int tmp_var_name()
     {
       step++;
       return step;
     }
+	
+	int condd = 0; 
+	char* cond()
+	{
+	condd++;
+	char *texte;
+	asprintf(&texte, "cond%d", condd);
+	return texte;
+	}
+	
+	int labl = 0;
+	char* label()
+	{
+	char* txt;
+	asprintf(&txt, "label%d", labl);
+	return txt;
+	}
+	
 
 %}
 
@@ -333,7 +352,7 @@ declaration
  }
 
 
-| EXTERN type_name declarator_list ';' {}
+| EXTERN type_name declarator_list ';' {$$.type = $2.type;}
 ;
 
 declarator_list
@@ -445,13 +464,62 @@ expression_statement
 ;
 
 selection_statement
-: IF '(' expression ')' statement 
-| IF '(' expression ')' statement ELSE statement {asprintf(&$$.name, "%%x%d", tmp_var_name()); asprintf(&$$.code, "br i1 %s, label %s, label %s", $3.var, $5.code, $7.code);}
-| FOR '(' expression_statement expression_statement expression ')' statement
+: IF '(' expression ')' statement {
+				asprintf(&$$.name, "%%x%d", tmp_var_name());
+				cond1 = cond();
+				label1 = label();
+				label2 = label();
+				asprintf(&$$.code, "%s = %s\n
+									br i1 %s, label %s, label %s \n
+									%s: \n
+									%s \n
+									%s: \n", cond1, $3.code, cond1, label1, label2, label1, $5.code, label2);
+				}
+| IF '(' expression ')' statement ELSE statement {
+				asprintf(&$$.name, "%%x%d", tmp_var_name()); 
+				cond = cond();
+				label1 = label();
+				label2 = label();
+				label3 = label();
+				asprintf(&$$.code, "%%%s = %s\n
+									br i1 %%%s, label %%%s, label %%%s\n
+									%s:\n
+									%s\n
+									%s:\n
+									%s\n", cond, $3.var, cond, label1, label2, label1, $5.code, label2, $7.code);
+				}
+| FOR '(' expression_statement expression_statement expression ')' statement {
+				asprintf(&$$.name, "%%x%d", tmp_var_name()); 
+				cond = cond();
+				label1 = label();
+				label2 = label();
+				label3 = label();
+				asprintf(&$$.code, "%s \n
+									%%%s = %s \n
+									%s: \n
+									br i1 %%%s, label %%%s, label %%%s \n
+									%s: \n
+									%s \n
+									%s \n
+									br %s \n
+									%s: \n", $3.code, cond, $4.code, label3, cond, label1, label2, label1, $7.code, $5.code, label3, label2);
+				}
 ;
 
 iteration_statement
-: WHILE '(' expression ')' statement
+: WHILE '(' expression ')' statement {asprintf(&$$.name, "%%x%d", tmp_var_name());
+										cond = cond();
+										label1 = label();
+										label2 = label();
+										label3 = label();
+										asprintf(&$$.code, "%%%s = %s \n
+															%s: \n
+															br i1 %%%s, label %%%s, label %%%s \n
+															%s: \n
+															%s \n
+															br %s \n
+															%s: \n", cond, $3.code, label1, cond, label2, label3, label2, $5.code, label1, label3);
+										}
 ;
 
 jump_statement
@@ -470,7 +538,7 @@ external_declaration
 ;
 
 function_definition
-: type_name declarator compound_statement {sortieFonction();} 
+: type_name declarator compound_statement {$$.type = $1.type; sortieFonction();} 
 ;
 
 %%
