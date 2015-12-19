@@ -5,7 +5,7 @@ int g(int x)
 
 int main()
 {
-	int x = 2.1;
+	float x = 2.1;
 	
 	g(x); // int attendu donner x
 	return 0;

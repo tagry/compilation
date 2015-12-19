@@ -1,12 +1,15 @@
 %{
-	#define _GNU_SOURCE
-    #include <stdio.h>
-    #include <string.h>
-    #include <stdlib.h>
-	#include "table_symbol.c"
+#define _GNU_SOURCE
+#define MAX_THREAD 1000
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <unistd.h>
+#include "table_symbol.c"
 	
     extern int yylineno;
-
+	
     int step=0;
     int yylex ();
     int yyerror ();
@@ -46,8 +49,26 @@ primary_expression
 | CONSTANTI  {$$.type = T_INT; asprintf(&$$.code, "%s", $1); /*asprintf($$.code, "%%x%d = add i32 %s, 0",tmp_var_name(), $1);*/}
 | CONSTANTF  {$$.type = T_FLOAT; asprintf(&$$.code,"%s",$1);/* asprintf($$.code, "%%x%d = add f32 %s, 0", tmp_var_name(), $1);*/}
 | '(' expression ')' {asprintf(&$$.code, "%s", $2.code);}
-| MAP '(' postfix_expression ',' postfix_expression ')' 
-| REDUCE '(' postfix_expression ',' postfix_expression ')'
+
+| MAP '(' postfix_expression ',' postfix_expression ')' {
+	pthread_t pid[MAX_THREAD];
+	int i;
+	int a[MAX_THREAD];
+
+	for (i=0; i<$3.complement; i++) {//"complement" est le nombre de case du tableau
+		a[i]=i;
+		pthread_create(&pid[i], NULL, routine, &a[i]);
+	} 
+	/* Attente de la fin des autres threads */
+	for (i=0; i< $3.complement; i++) {
+		pthread_join(pid[i], NULL);
+	}
+	// Tout les thread son terminés
+  }
+
+| REDUCE '(' postfix_expression ',' postfix_expression ')' {
+	
+  }
 | IDENTIFIER '(' ')' {
 	appel_arg = hachtab[hachage($1)][GLOBAL].complement;
 	asprintf(&fonction, "%s", $1);
@@ -56,7 +77,7 @@ primary_expression
 	appel_arg = hachtab[hachage($1)][GLOBAL].complement;
 	asprintf(&fonction, "%s", $1);
   } argument_expression_list ')' {
-	  if(appel_arg > 0)
+	  if(appel_arg > 1)
 		  fprintf(stderr, "Dans fonction : %s pas bon nombre d'argument\n", fonction);
 	}
 | IDENTIFIER INC_OP
@@ -70,27 +91,27 @@ postfix_expression
 
 argument_expression_list
 : expression {
-	if(appel_arg < 0)
+	if(appel_arg < 1)
 	{
-		fprintf(stderr, "Dans fonction : %s pas bon nombre d'argument\n", fonction);
+		fprintf(stderr, "Dans fonction : %s pas bon nombre d'argument : ERREUR\n", fonction);
 	}
     else if($1.type != hachtab[hachage(fonction)][GLOBAL].arg[appel_arg])
 	{
-		fprintf(stderr, "Dans fonction : %s pas bon type pour l'argument %d\n", fonction, appel_arg+1);
+		fprintf(stderr, "Dans fonction : %s pas bon type pour l'argument %d : ERREUR\n", fonction, appel_arg);
 		return 1;
 	}
 	else
 		appel_arg--;
  }
 | argument_expression_list ',' expression {
-	if(appel_arg < 0)
+	if(appel_arg < 1)
 	{
-		fprintf(stderr, "Dans fonction : %s pas bon nombre d'argument\n", fonction);
+		fprintf(stderr, "Dans fonction : %s pas bon nombre d'argument : ERREUR\n", fonction);
 		return 1;
 	}
 	else if($3.type != hachtab[hachage(fonction)][GLOBAL].arg[appel_arg])
 	{
-		fprintf(stderr, "Dans fonction : %s pas bon type pour l'argument %d\n", fonction, appel_arg+1);
+		fprintf(stderr, "Dans fonction : %s pas bon type pour l'argument %d : ERREUR\n", fonction, appel_arg);
 		return 1;
 	}
 	
@@ -350,8 +371,34 @@ function_definition
 	int fonct = 0;
 	for(i = 0; hachtab[i][GLOBAL].classe != FONCT; i++);
 	fonct = i;
-	
+
 	hachtab[fonct][GLOBAL].complement = 0;
+	
+	if(!strcmp($1.code, "VOID"))
+		hachtab[fonct][GLOBAL].arg[hachtab[fonct][GLOBAL].complement] = T_VOID;
+	
+	else if(!strcmp($1.code, "INT"))
+	{
+		hachtab[fonct][GLOBAL].arg[hachtab[fonct][GLOBAL].complement] = T_INT;
+	}
+	
+	else if(!strcmp($1.code, "FLOAT"))
+	{
+		hachtab[fonct][GLOBAL].arg[hachtab[fonct][GLOBAL].complement] = T_FLOAT;
+	}
+	
+	else if(!strcmp($1.code, "INT*"))
+	{
+		hachtab[fonct][GLOBAL].arg[hachtab[fonct][GLOBAL].complement] = T_INT_P;
+	}
+
+	else if(!strcmp($1.code, "FLOAT*"))
+	{
+		hachtab[fonct][GLOBAL].arg[hachtab[fonct][GLOBAL].complement] = T_FLOAT_P;
+	}
+
+	hachtab[fonct][GLOBAL].complement++;
+
 	for(i = 0;i < SIZE; i++)
 	{
 		if(hachtab[i][LOCAL].classe == ARGUMENT)

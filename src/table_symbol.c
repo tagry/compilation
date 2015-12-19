@@ -112,3 +112,10 @@ void met_classe_arg(char *s)
 {
 	hachtab[hachage(s)][etat].classe = ARGUMENT;
 }
+
+
+void *routine(void *ptr) { 
+	int x=*(int *)ptr;
+	printf("Un thread en plus pour le processus pid %d) ! x=%d\n",getpid(),++x); 
+	return NULL; // Equivalent � pthread_exit(NULL) 
+}

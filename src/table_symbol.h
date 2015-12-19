@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <string.h>
+#include <pthread.h>
+#include <unistd.h>
 #define SIZE 1013 
 
 enum context_expression
@@ -99,3 +101,9 @@ void met_classe_variable(char *s);
 Met la classe au argument
  */
 void met_classe_arg(char *s);
+
+
+/*
+Cette fonction est la routine pour effectuer le map sur les differents élements du tableau
+ */
+void *routine(void *ptr);

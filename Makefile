@@ -2,15 +2,15 @@ SRC=src
 BUILD=build
 LEX=lex
 YACC=bison
-CFLAGS=-Wall
-CC=gcc -O0 -g
+CFLAGS=-Wall 
+CC=gcc -O0 -g 
 
 EXPRESSION= 
 
 all:parse
 
 parse:grammar.c scanner.c
-	$(CC) $(CFLAGS) -o $(BUILD)/$@ $(BUILD)/grammar.c $(BUILD)/scanner.c
+	$(CC) $(CFLAGS) -o $(BUILD)/$@ $(BUILD)/grammar.c $(BUILD)/scanner.c -lpthread 
 
 grammar.c:$(SRC)/grammar.y
 	$(YACC) -d -o $(BUILD)/$@ --defines=$(BUILD)/grammar.tab.h $^
