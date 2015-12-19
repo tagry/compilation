@@ -7,7 +7,7 @@ int etat = GLOBAL; //defini si on est en global ou en local
 int appel_arg = 0; // variable qui compte les argument donner à une fonctionx
 char *fonction;
 
-struct symbol_t EMPTY={"","",C_VOID,T_VOID,0}; // un symbole vide
+struct symbol_t EMPTY={"","",0,C_VOID,T_VOID}; // un symbole vide
 struct symbol_t hachtab[SIZE][2];
 
 int hachage(char *s) {
@@ -80,16 +80,22 @@ void met_type(char *s, char *type)
 	if(!strcmp(type,"VOID"))
 	{
 		fprintf (stderr, "%s: Pas de type \n", s);
-		return 1;
 	}
 	else if(!strcmp(type,"INT"))
 	{
-	    hachtab[hachage(s)][etat].type = T_INT;
+		if(hachtab[hachage(s)][etat].complement > 0)
+			hachtab[hachage(s)][etat].type = T_INT_TAB;
+		else
+			hachtab[hachage(s)][etat].type = T_INT;
 	}
 	else if(!strcmp(type,"FLOAT"))
 	{
-		hachtab[hachage(s)][etat].type = T_FLOAT;
+		if(hachtab[hachage(s)][etat].complement > 0)
+			hachtab[hachage(s)][etat].type = T_FLOAT_TAB;
+		else
+			hachtab[hachage(s)][etat].type = T_FLOAT;
 	}
+	
 	else if(!strcmp(type,"INT*"))
 	{
 		hachtab[hachage(s)][etat].type = T_INT_P;

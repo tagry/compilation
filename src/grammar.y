@@ -246,7 +246,10 @@ declarator
 | '(' '*'  IDENTIFIER ')' '(' argument_list ')'
 | IDENTIFIER '[' CONSTANTI ']' {
 	if(!rechercheTout($1))
+	{
 		addtab($1);
+		hachtab[hachage($1)][etat].complement = atoi($3);
+	}
 	else
 		fprintf(stderr, "%s : Déclaration multiple ! ERREUR\n", $1);}
 
@@ -265,7 +268,6 @@ declarator
 	}
 	else
 		fprintf(stderr, "%s : Déclaration multiple ! ERREUR\n", $1);
-	hachtab[hachage($1)];
   }
 
 | IDENTIFIER '(' ')' {

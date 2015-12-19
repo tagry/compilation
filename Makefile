@@ -103,6 +103,6 @@ testNV:parse
 	./build/parse Tests/TestsNonValide/test26.c
 
 clean:
-	rm -f build/*
+	rm -rf build/*
 	cp $(SRC)/table_symbol.h $(BUILD)
 	cp $(SRC)/table_symbol.c $(BUILD)
