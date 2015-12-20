@@ -19,6 +19,7 @@ struct expression
 {
 	char *code;
 	char *var;//(pointeur)
+	char *name;
 	int complement;
 	enum type_expression type;
 };
@@ -107,3 +108,8 @@ void met_classe_arg(char *s);
 Cette fonction est la routine pour effectuer le map sur les differents élements du tableau
  */
 void *routine(void *ptr);
+
+/*
+Retourne le type avec T_
+ */
+enum context_expression retourn_type(char *s);

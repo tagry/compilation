@@ -4,7 +4,7 @@
 
 void *thread_1(void *arg)
 {
-    printf("Nous sommes dans le thread.\n");
+//    printf("Nous sommes dans le thread.\n");
     /* Pour enlever le warning */
     (void) arg;
     pthread_exit(NULL);

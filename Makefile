@@ -21,31 +21,35 @@ scanner.c: $(SRC)/scanner.l
 testV:parse
 	clear
 	echo ###############TEST1################			
-	./build/parse Tests/TestsValides/test1.c
+	./build/parse Tests/TestsValides/test1.c $(BUILD)/log/log1.txt
 	echo ###############TEST2################		
-	./build/parse Tests/TestsValides/test2.c
+	./build/parse Tests/TestsValides/test2.c $(BUILD)/log/log2.txt
 	echo ###############TEST3################		
-	./build/parse Tests/TestsValides/test3.c
+	./build/parse Tests/TestsValides/test3.c $(BUILD)/log/log3.txt
 	echo ###############TEST4################		
-	./build/parse Tests/TestsValides/test4.c
+	./build/parse Tests/TestsValides/test4.c $(BUILD)/log/log4.txt
 	echo ###############TEST5################		
-	./build/parse Tests/TestsValides/test5.c
+	./build/parse Tests/TestsValides/test5.c $(BUILD)/log/log5.txt
 	echo ###############TEST6################		
-	./build/parse Tests/TestsValides/test6.c
+	./build/parse Tests/TestsValides/test6.c $(BUILD)/log/log6.txt
 	echo ###############TEST7################		
-	./build/parse Tests/TestsValides/test7.c
+	./build/parse Tests/TestsValides/test7.c $(BUILD)/log/log7.txt
 	echo ###############TEST8################		
-	./build/parse Tests/TestsValides/test8.c
+	./build/parse Tests/TestsValides/test8.c $(BUILD)/log/log8.txt
 	echo ###############TEST9################		
-	./build/parse Tests/TestsValides/test9.c
+	./build/parse Tests/TestsValides/test9.c $(BUILD)/log/log9.txt
 	echo ###############TEST10###############		
-	./build/parse Tests/TestsValides/test10.c
+	./build/parse Tests/TestsValides/test10.c $(BUILD)/log/log10.txt
 	echo ###############TEST11###############		
-	./build/parse Tests/TestsValides/test11.c
+	./build/parse Tests/TestsValides/test11.c $(BUILD)/log/log11.txt
 	echo ###############TEST12###############		
-	./build/parse Tests/TestsValides/test12.c
+	./build/parse Tests/TestsValides/test12.c $(BUILD)/log/log12.txt
 	echo ###############TEST13###############	
-	./build/parse Tests/TestsValides/test13.c
+	./build/parse Tests/TestsValides/test13.c $(BUILD)/log/log13.txt
+	echo ###############TEST14###############		
+	./build/parse Tests/TestsValides/test14.c $(BUILD)/log/log14.txt
+	echo ###############TEST15###############	
+	./build/parse Tests/TestsValides/test15.c $(BUILD)/log/log15.txt
 
 testNV:parse
 	clear
@@ -104,5 +108,6 @@ testNV:parse
 
 clean:
 	rm -rf build/*
+	mkdir build/log
 	cp $(SRC)/table_symbol.h $(BUILD)
 	cp $(SRC)/table_symbol.c $(BUILD)
