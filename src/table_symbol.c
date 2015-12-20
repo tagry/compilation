@@ -63,7 +63,9 @@ void init() {
 }
 
 void entreeFonction(void){
+	int i = 0;
 	etat = LOCAL;
+	for (i=0; i<SIZE; i++) hachtab[i][LOCAL]=EMPTY;
 }
 
 void sortieFonction(void){
@@ -95,4 +97,31 @@ void met_type(char *s, char *type)
 	{
 		hachtab[hachage(s)][etat].type = T_FLOAT_P;
 	}
+}
+
+
+enum context_expression retourn_type(char *s)
+{
+	if(!strcmp(s,"VOID"))
+	{
+		return T_VOID;
+	}
+	else if(!strcmp(s,"INT"))
+	{
+		return T_INT;
+	}
+	else if(!strcmp(s,"FLOAT"))
+	{
+		return T_FLOAT;
+	}
+	else if(!strcmp(s,"INT*"))
+	{
+		return T_INT_P;
+	}
+	else if(!strcmp(s,"FLOAT*"))
+	{
+		return T_FLOAT_P;
+	}
+	else
+		return T_FLOAT_P;
 }

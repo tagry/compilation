@@ -87,3 +87,9 @@ Détecte les déclaration multiple et arrete la compilation
 ET met l'identificateur dans la table des symboles !
  */
 void met_type(char *s, char* type);
+
+
+/*
+Retourne le type avec T_
+ */
+enum context_expression retourn_type(char *s);
