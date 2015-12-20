@@ -88,9 +88,25 @@ primary_expression
   }
 
 | MAP '(' postfix_expression ',' postfix_expression ')' {
-	pthread_t pid[MAX_THREAD];
+	asprintf(&$$.var, "%s", tmp_var_name());
+	tmp_var_name();
+	for (i=0; i<$5.complement; i++)
+	{
+		asprintf(&$$.code, "%%x%d = %s\n %s = %s %s %%x%d\n%%x%d = getelementptr %s %s, i32 1\n", step, $5.var, $5.var , $3, $5.type, step, step, $5.type, $5.var);	
+	} 
+
+
+
+	/*pthread_t pid[MAX_THREAD];
 	int i;
 	int a[MAX_THREAD];
+	
+	void* routine(void* arg)
+	{
+	asprintf(&$$.code, "");
+	(void) arg;
+	pthread_exit(NULL);
+	}
 
 	for (i=0; i<$3.complement; i++) {//"complement" est le nombre de case du tableau
 		a[i]=i;
@@ -101,9 +117,12 @@ primary_expression
 		pthread_join(pid[i], NULL);
 	}
 	// Tout les thread son terminés
+	*/
   }
 
 | REDUCE '(' postfix_expression ',' postfix_expression ')' {
+	asprintf(&$$.var, "%%x%d", tmp_var_name());
+	asprintf(&$$.code, "$5.var = $3 $5.type $5.var, $5.type ", );
 	
   }
 | IDENTIFIER '(' ')' {
