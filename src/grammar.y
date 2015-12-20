@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <pthread.h>
 #include "table_symbol.c"
     
     extern int yylineno;
@@ -80,7 +81,67 @@ primary_expression//changer le type faire des recherches dans global et local ou
 | CONSTANTF  {$$.type = T_INT; asprintf(&$$.code,"%s",$1);/* asprintf($$.code, "%%x%d = add f32 %s, 0", tmp_var_name(), $1);*/}
 | '(' expression ')' {$$.type = VOID; asprintf(&$$.code, "%s", $2.code);}
 | MAP '(' postfix_expression ',' postfix_expression ')' {}
-| REDUCE '(' postfix_expression ',' postfix_expression ')' {}
+| REDUCE '(' postfix_expression ',' postfix_expression ')' {
+	asprintf(&$$.var, "%%x%d", tmp_var_name());
+	void *thread_1(void *arg)
+	{
+		
+		$5.var = 
+
+		(void) arg;
+		pthread_exit(NULL);
+	}
+	void *thread_2(void *arg)
+	{
+		
+
+		(void) arg;
+		pthread_exit(NULL);
+	}
+	void *thread_3(void *arg)
+	{
+		
+
+		(void) arg;
+		pthread_exit(NULL);
+	}
+	void *thread_4(void *arg)
+	{
+		
+
+		(void) arg;
+		pthread_exit(NULL);
+	}
+	
+    pthread_t thread1;
+	pthread_t thread2;
+	pthread_t thread3;
+	pthread_t thread4;
+	
+	for {\\je me dis qu'il doit y avoir une boucle ici..
+	if(pthread_create(&thread1, NULL, thread_1, NULL) == -1) {
+		perror("pthread_create");
+		return EXIT_FAILURE;
+    }
+	if(pthread_create(&thread2, NULL, thread_2, NULL) == -1) {
+		perror("pthread_create");
+		return EXIT_FAILURE;
+    }
+	if(pthread_create(&thread3, NULL, thread_3, NULL) == -1) {
+		perror("pthread_create");
+		return EXIT_FAILURE;
+    }
+	if(pthread_create(&thread4, NULL, thread_4, NULL) == -1) {
+		perror("pthread_create");
+		return EXIT_FAILURE;
+    }
+	}
+
+}
+
+	
+	
+	}
 | IDENTIFIER '(' ')' {$$.type = VOID;}
 | IDENTIFIER '(' argument_expression_list ')' {$$.type = VOID;}
 | IDENTIFIER INC_OP {$$.type = VOID;
