@@ -89,14 +89,16 @@ primary_expression
 
 | MAP '(' postfix_expression ',' postfix_expression ')' {
 	asprintf(&$$.var, "%s", tmp_var_name());
-	tmp_var_name();
+	
 	if($5.type == T_INT_TAB)
 		char* tipe = "i32";
 	else 
 		char* tipe = "f32";
+	void case[$5.complement];
 	for (i=0; i<$5.complement; i++)
 	{
-		asprintf(&$$.code, "%%x%d = %s\n %s = %s %s %%x%d\n%%x%d = getelementptr %s %s, i32 1\n", step, $5.var, $5.var , $3, $5.type, step, step, $5.type, $5.var);	
+		tmp_var_name();
+		asprintf(&$$.code, "%%x%d = load %s %s\n%%x%d = %s %s %%x%d\n%s = getelementptr %s %s, i32 1\n", step, tipe, $5.var, step, $3, tipe, step, $5.var, $5.type, $5.var);	
 	} 
 
 
@@ -126,8 +128,15 @@ primary_expression
 
 | REDUCE '(' postfix_expression ',' postfix_expression ')' {
 	asprintf(&$$.var, "%%x%d", tmp_var_name());
-	asprintf(&$$.code, "$5.var = $3 $5.type $5.var, $5.type ", );
-	
+	if($5.type == T_INT_TAB)
+		char* tipe = "i32";
+	else 
+		char* tipe = "f32";
+	asprintf(&$$.code, "%%x%d = add %s 0\n", tmp_var_name());
+	for(i=0; i<$3.complement; i++)
+	{
+		asprintf(&$$.code, "%%x%d = %s %s %%x%d, %s %s\n%s = getelementptr %s %s, i32 1\n", step, $3, tipe, step, tipe, $5.var, $5.var, $5.type, $5.var);
+	}
   }
 | IDENTIFIER '(' ')' {
 	$$.type = VOID;
