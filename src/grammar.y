@@ -90,6 +90,10 @@ primary_expression
 | MAP '(' postfix_expression ',' postfix_expression ')' {
 	asprintf(&$$.var, "%s", tmp_var_name());
 	tmp_var_name();
+	if($5.type == T_INT_TAB)
+		char* tipe = "i32";
+	else 
+		char* tipe = "f32";
 	for (i=0; i<$5.complement; i++)
 	{
 		asprintf(&$$.code, "%%x%d = %s\n %s = %s %s %%x%d\n%%x%d = getelementptr %s %s, i32 1\n", step, $5.var, $5.var , $3, $5.type, step, step, $5.type, $5.var);	
