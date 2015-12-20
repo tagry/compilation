@@ -78,7 +78,6 @@ void met_type(char *s, char *type)
 	if(!strcmp(type,"VOID"))
 	{
 		fprintf (stderr, "%s: Pas de type \n", s);
-		return 1;
 	}
 	else if(!strcmp(type,"INT"))
 	{
